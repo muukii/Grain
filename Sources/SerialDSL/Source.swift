@@ -57,6 +57,10 @@ public struct SerialEmtpy: SerialView, Decodable {
   
   public typealias Body = Never
   
+  public init() {
+    
+  }
+  
   public func encode(to encoder: Encoder) throws {
     
   }
@@ -64,6 +68,10 @@ public struct SerialEmtpy: SerialView, Decodable {
 
 public struct SerialNull: SerialView {
   public typealias Body = Never
+  
+  public init() {
+    
+  }
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
@@ -318,7 +326,7 @@ public struct SerialObject: SerialView {
   
   public var members: [SerialMember]
   
-  init(@MemberBuilder _ members: () -> [SerialMember]) {
+  public init(@MemberBuilder _ members: () -> [SerialMember]) {
     self.members = members()
   }
   
