@@ -2,7 +2,7 @@ name: Checks
 
 on:
   push:
-    branches: "*"
+    branches: "**"
 
 jobs:
   build:
