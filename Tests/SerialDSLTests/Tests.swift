@@ -1,32 +1,37 @@
 import XCTest
 
-@testable import JSONDSL
+@testable import SerialDSL
 
 final class JSONDSLTests: XCTestCase {
-  
+
   let encoder = JSONEncoder()
-  
-  func toString(_ j: some JSONView) -> String {
+
+  func toString(_ j: some SerialView) -> String {
     let data = try! encoder.encode(j)
     return String(data: data, encoding: .utf8)!
   }
-  
-  func compare(_ j: some JSONView, _ expects: String, file: StaticString = #filePath, line: UInt = #line) {
+
+  func compare(
+    _ j: some SerialView,
+    _ expects: String,
+    file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
     XCTAssertEqual(toString(j), expects, file: file, line: line)
   }
-  
+
   override func setUp() {
     encoder.outputFormatting = .prettyPrinted
   }
-  
-  func type<J: JSONView>(@ValueBuilder _ b: () -> J) -> J {
+
+  func type<J: SerialView>(@ValueBuilder _ b: () -> J) -> J {
     b()
   }
-    
+
   func testArray_1() {
-    
+
     compare(
-      JSONArray {
+      SerialArray {
         1
       },
       """
@@ -35,13 +40,13 @@ final class JSONDSLTests: XCTestCase {
       ]
       """
     )
-    
+
   }
-  
+
   func testArray_2() {
-    
+
     compare(
-      JSONArray {
+      SerialArray {
         1
         false
         2.5
@@ -54,20 +59,20 @@ final class JSONDSLTests: XCTestCase {
       ]
       """
     )
-    
+
   }
-    
+
   func testArray_3() {
-              
+
     compare(
-      JSONArray {
-        JSONObject {
-          JSONMember("a") {
+      SerialArray {
+        SerialObject {
+          SerialMember("a") {
             1
           }
         }
-        JSONObject {
-          JSONMember("b") {
+        SerialObject {
+          SerialMember("b") {
             1
           }
         }
@@ -83,17 +88,34 @@ final class JSONDSLTests: XCTestCase {
       ]
       """
     )
-    
+
   }
-  
+
+  func test_null() {
+
+    compare(
+      SerialObject {
+        SerialMember("a") {
+          SerialNull()
+        }
+      },
+      """
+      {
+        "a" : null
+      }
+      """
+    )
+
+  }
+
   func test_component() throws {
-    
-    struct Record: JSONView {
-      
+
+    struct Record: SerialView {
+
       let name: String
       let age: Int
-      
-      var body: some JSONView {
+
+      var body: some SerialView {
         Object {
           Member("name") {
             name
@@ -105,27 +127,27 @@ final class JSONDSLTests: XCTestCase {
       }
 
     }
-     
-    struct Results: JSONView {
-      
+
+    struct Results: SerialView {
+
       let records: [Record]
-      
-      var body: some JSONView {
+
+      var body: some SerialView {
         Object {
           Member("results") {
             records
           }
         }
-        
+
       }
-      
+
     }
-        
+
     let r = Results(records: [
       .init(name: "A", age: 1),
-      .init(name: "B", age: 2)
+      .init(name: "B", age: 2),
     ])
-  
+
     compare(
       r,
       """
@@ -143,6 +165,6 @@ final class JSONDSLTests: XCTestCase {
       }
       """
     )
-    
+
   }
 }

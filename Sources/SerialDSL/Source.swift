@@ -1,32 +1,41 @@
 import Foundation
 
-public protocol JSONView: Encodable {
+public protocol SerialView: Encodable {
   
-  associatedtype Body: JSONView
+  associatedtype Body: SerialView
   
   @ValueBuilder var body: Body { get }
   
 }
 
-extension JSONView {
+extension SerialView {
   
-  public typealias Object = JSONObject
-  public typealias Member = JSONMember
-  public typealias Number = JSONNumber
-  public typealias Null = JSONNull
-  public typealias Boolean = JSONBoolean
+  public typealias Object = SerialObject
+  public typealias Member = SerialMember
+  public typealias Number = SerialNumber
+  public typealias Null = SerialNull
+  public typealias Boolean = SerialBoolean
+  public typealias Array = SerialArray
   
 }
 
-extension JSONView {
+extension SerialView {
   
   public func encode(to encoder: Encoder) throws {
     try body.encode(to: encoder)
   }
   
+  /// Renders data as JSON in String
+  public func render() -> String {
+    
+    let encoder = JSONEncoder()
+    let data = try! encoder.encode(self)
+    return String(data: data, encoding: .utf8)!
+  }
+  
 }
 
-extension JSONView where Body == Never {
+extension SerialView where Body == Never {
   
   @_spi(JSONNever)
   public var body: Body {
@@ -35,26 +44,33 @@ extension JSONView where Body == Never {
   
 }
 
-extension Never: JSONView {
+extension Never: SerialView {
   
   @_spi(JSONNever)
-  public var body: JSONEmtpy {
-    return JSONEmtpy()
+  public var body: SerialEmtpy {
+    return SerialEmtpy()
   }
 }
 
-public struct JSONEmtpy: JSONView, Decodable {
+public struct SerialEmtpy: SerialView, Decodable {
   
   public typealias Body = Never
   
+  public func encode(to encoder: Encoder) throws {
+    
+  }
 }
 
-public struct JSONNull: JSONView {
+public struct SerialNull: SerialView {
   public typealias Body = Never
   
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encodeNil()
+  }
 }
 
-public struct JSONBoolean: JSONView, Encodable {
+public struct SerialBoolean: SerialView, Encodable {
   
   public typealias Body = Never
   
@@ -70,7 +86,7 @@ public struct JSONBoolean: JSONView, Encodable {
   }
 }
 
-public struct JSONNumber: JSONView, Encodable {
+public struct SerialNumber: SerialView, Encodable {
   
   public enum Number {
     case int(Int)
@@ -175,7 +191,7 @@ public struct JSONNumber: JSONView, Encodable {
   
 }
 
-public struct JSONString: JSONView, Encodable {
+public struct SerialString: SerialView, Encodable {
   public typealias Body = Never
   
   public var value: String
@@ -191,17 +207,17 @@ public struct JSONString: JSONView, Encodable {
   
 }
 
-public struct JSONArray: JSONView, Encodable {
+public struct SerialArray: SerialView, Encodable {
   
   public typealias Body = Never
   
-  public var elements: [any JSONView]
+  public var elements: [any SerialView]
   
-  public init(@ElementsBuilder _ elements: () -> [any JSONView]) {
+  public init(@ElementsBuilder _ elements: () -> [any SerialView]) {
     self.elements = elements()
   }
       
-  init(elements: [any JSONView]) {
+  init(elements: [any SerialView]) {
     self.elements = elements
   }
   
@@ -215,79 +231,79 @@ public struct JSONArray: JSONView, Encodable {
   @resultBuilder
   public enum ElementsBuilder {
     
-    public static func buildExpression(_ expression: NSNull) -> JSONNull {
+    public static func buildExpression(_ expression: NSNull) -> SerialNull {
       .init()
     }
     
-    public static func buildExpression(_ expression: String) -> JSONString {
+    public static func buildExpression(_ expression: String) -> SerialString {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Bool) -> JSONBoolean {
+    public static func buildExpression(_ expression: Bool) -> SerialBoolean {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Int) -> JSONNumber {
+    public static func buildExpression(_ expression: Int) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Int8) -> JSONNumber {
+    public static func buildExpression(_ expression: Int8) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Int16) -> JSONNumber {
+    public static func buildExpression(_ expression: Int16) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Int32) -> JSONNumber {
+    public static func buildExpression(_ expression: Int32) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Int64) -> JSONNumber {
+    public static func buildExpression(_ expression: Int64) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: UInt) -> JSONNumber {
+    public static func buildExpression(_ expression: UInt) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: UInt8) -> JSONNumber {
+    public static func buildExpression(_ expression: UInt8) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: UInt16) -> JSONNumber {
+    public static func buildExpression(_ expression: UInt16) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: UInt32) -> JSONNumber {
+    public static func buildExpression(_ expression: UInt32) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: UInt64) -> JSONNumber {
+    public static func buildExpression(_ expression: UInt64) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Float) -> JSONNumber {
+    public static func buildExpression(_ expression: Float) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression(_ expression: Double) -> JSONNumber {
+    public static func buildExpression(_ expression: Double) -> SerialNumber {
       .init(expression)
     }
     
-    public static func buildExpression<J: JSONView>(_ component: J) -> J {
+    public static func buildExpression<J: SerialView>(_ component: J) -> J {
       component
     }
     
-    public static func buildBlock() -> JSONEmtpy {
+    public static func buildBlock() -> SerialEmtpy {
       .init()
     }
            
-    public static func buildBlock(_ components: [any JSONView]) -> [any JSONView] {
+    public static func buildBlock(_ components: [any SerialView]) -> [any SerialView] {
       return components
     }
     
-    public static func buildBlock(_ components: any JSONView...) -> [any JSONView] {
+    public static func buildBlock(_ components: any SerialView...) -> [any SerialView] {
       return components
     }
     
@@ -295,13 +311,13 @@ public struct JSONArray: JSONView, Encodable {
 
 }
 
-public struct JSONObject: JSONView {
+public struct SerialObject: SerialView {
   
   public typealias Body = Never
   
-  public var members: [JSONMember]
+  public var members: [SerialMember]
   
-  init(@MemberBuilder _ members: () -> [JSONMember]) {
+  init(@MemberBuilder _ members: () -> [SerialMember]) {
     self.members = members()
   }
   
@@ -314,11 +330,11 @@ public struct JSONObject: JSONView {
   @resultBuilder
   public enum MemberBuilder {
     
-    public static func buildBlock() -> [JSONMember] {
+    public static func buildBlock() -> [SerialMember] {
       []
     }
     
-    public static func buildBlock(_ component: JSONMember...) -> [JSONMember] {
+    public static func buildBlock(_ component: SerialMember...) -> [SerialMember] {
       component
     }
     
@@ -326,7 +342,7 @@ public struct JSONObject: JSONView {
   
 }
 
-public struct JSONMember: JSONView {
+public struct SerialMember: SerialView {
   
   public typealias Body = Never
   
@@ -346,9 +362,9 @@ public struct JSONMember: JSONView {
   }
   
   public let name: String
-  public let value: any JSONView
+  public let value: any SerialView
   
-  public init(_ name: String, @ValueBuilder value: () -> any JSONView) {
+  public init(_ name: String, @ValueBuilder value: () -> any SerialView) {
     self.name = name
     self.value = value()
   }
@@ -362,80 +378,80 @@ public struct JSONMember: JSONView {
 @resultBuilder
 public enum ValueBuilder {
   
-  public static func buildExpression(_ expression: NSNull) -> JSONNull {
+  public static func buildExpression(_ expression: NSNull) -> SerialNull {
     .init()
   }
   
-  public static func buildExpression(_ expression: String) -> JSONString {
+  public static func buildExpression(_ expression: String) -> SerialString {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Bool) -> JSONBoolean {
+  public static func buildExpression(_ expression: Bool) -> SerialBoolean {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Int) -> JSONNumber {
+  public static func buildExpression(_ expression: Int) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Int8) -> JSONNumber {
+  public static func buildExpression(_ expression: Int8) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Int16) -> JSONNumber {
+  public static func buildExpression(_ expression: Int16) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Int32) -> JSONNumber {
+  public static func buildExpression(_ expression: Int32) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Int64) -> JSONNumber {
+  public static func buildExpression(_ expression: Int64) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: UInt) -> JSONNumber {
+  public static func buildExpression(_ expression: UInt) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: UInt8) -> JSONNumber {
+  public static func buildExpression(_ expression: UInt8) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: UInt16) -> JSONNumber {
+  public static func buildExpression(_ expression: UInt16) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: UInt32) -> JSONNumber {
+  public static func buildExpression(_ expression: UInt32) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: UInt64) -> JSONNumber {
+  public static func buildExpression(_ expression: UInt64) -> SerialNumber {
     .init(expression)
   }
 
-  public static func buildExpression(_ expression: Float) -> JSONNumber {
+  public static func buildExpression(_ expression: Float) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression(_ expression: Double) -> JSONNumber {
+  public static func buildExpression(_ expression: Double) -> SerialNumber {
     .init(expression)
   }
   
-  public static func buildExpression<J: JSONView>(_ component: J) -> J {
+  public static func buildExpression<J: SerialView>(_ component: J) -> J {
     component
   }
   
-  public static func buildExpression<J: JSONView>(_ component: [J]) -> JSONArray {
+  public static func buildExpression<J: SerialView>(_ component: [J]) -> SerialArray {
     .init(elements: component)
   }
   
   
-  public static func buildBlock() -> JSONEmtpy {
+  public static func buildBlock() -> SerialEmtpy {
     .init()
   }
   
-  public static func buildBlock<J: JSONView>(_ component: J) -> J {
+  public static func buildBlock<J: SerialView>(_ component: J) -> J {
     component
   }
   

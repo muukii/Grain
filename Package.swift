@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "JSONDSL",
+    name: "SerialDSL",
     platforms: [
       .macOS(.v10_13),
       .iOS(.v13),
@@ -12,8 +12,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "JSONDSL",
-            targets: ["JSONDSL"]),
+            name: "SerialDSL",
+            targets: ["SerialDSL"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -23,10 +23,10 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "JSONDSL",
+            name: "SerialDSL",
             dependencies: []),
         .testTarget(
-            name: "JSONDSLTests",
-            dependencies: ["JSONDSL"]),
+            name: "SerialDSLTests",
+            dependencies: ["SerialDSL"]),
     ]
 )
