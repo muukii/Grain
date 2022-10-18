@@ -316,6 +316,29 @@ public struct SerialArray: SerialView, Encodable {
       return components
     }
     
+    public static func buildArray<T: SerialView>(_ components: [T]) -> [T] {
+      return components
+    }
+    
+    public static func buildOptional<T: SerialView>(_ component: T?) -> any SerialView {
+      guard let component else {
+        return SerialNull()
+      }
+      return component
+    }
+    
+    public static func buildEither<T: SerialView>(first component: T) -> T {
+      component
+    }
+    
+    public static func buildEither<T: SerialView>(second component: T) -> T {
+      component
+    }
+    
+    public static func buildLimitedAvailability<T: SerialView>(_ component: T) -> T {
+      component
+    }
+    
   }
 
 }
@@ -344,6 +367,29 @@ public struct SerialObject: SerialView {
     }
     
     public static func buildBlock(_ component: SerialMember...) -> [SerialMember] {
+      component
+    }
+    
+    public static func buildArray(_ components: [SerialMember]) -> [SerialMember] {
+      return components
+    }
+    
+    public static func buildOptional(_ component: SerialMember?) -> [SerialMember] {
+      guard let component else {
+        return []
+      }
+      return [component]
+    }
+    
+    public static func buildEither(first component: SerialMember) -> SerialMember {
+      component
+    }
+    
+    public static func buildEither(second component: SerialMember) -> SerialMember {
+      component
+    }
+    
+    public static func buildLimitedAvailability(_ component: SerialMember) -> SerialMember {
       component
     }
     
@@ -515,6 +561,28 @@ public enum ValueBuilder {
     .init(elements: component)
   }
   
+  public static func buildArray<T: SerialView>(_ components: [T]) -> [T] {
+    return components
+  }
+  
+  public static func buildOptional<T: SerialView>(_ component: T?) -> any SerialView {
+    guard let component else {
+      return SerialNull()
+    }
+    return component
+  }
+  
+  public static func buildEither<T: SerialView>(first component: T) -> T {
+    component
+  }
+  
+  public static func buildEither<T: SerialView>(second component: T) -> T {
+    component
+  }
+  
+  public static func buildLimitedAvailability<T: SerialView>(_ component: T) -> T {
+    component
+  }
   
   public static func buildBlock() -> SerialEmtpy {
     .init()
