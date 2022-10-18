@@ -147,7 +147,6 @@ final class JSONDSLTests: XCTestCase {
       .init(name: "A", age: 1),
       .init(name: "B", age: 2),
     ])
-    
 
     compare(
       r,
@@ -168,9 +167,9 @@ final class JSONDSLTests: XCTestCase {
     )
 
   }
-  
+
   func test_array() {
-    
+
     compare(
       SerialObject {
         SerialMember("a") {
@@ -187,6 +186,166 @@ final class JSONDSLTests: XCTestCase {
       """
     )
 
-    
+  }
+
+  func test_loop() {
+
+    compare(
+      SerialObject {
+        for name in ["a", "b"] {
+          SerialMember(name) {
+            ["a", "b"]
+          }
+        }
+      },
+      """
+      {
+        "a" : [
+          "a",
+          "b"
+        ],
+        "b" : [
+          "a",
+          "b"
+        ]
+      }
+      """
+    )
+  }
+
+  func test_control_flow() {
+
+    let flag = false
+
+    _ = SerialObject {
+
+      if flag {
+        SerialMember("1") {
+          1
+        }
+      }
+
+    }
+
+    _ = SerialObject {
+
+      if flag {
+        SerialMember("1") {
+          1
+        }
+      }
+
+      SerialMember("1") {
+        1
+      }
+
+    }
+
+    _ = SerialObject {
+
+      [
+        SerialMember("1") {
+          1
+        },
+        SerialMember("1") {
+          1
+        },
+      ]
+
+    }
+
+    _ = SerialObject {
+
+      for name in ["a", "b"] {
+        SerialMember(name) {
+          ["a", "b"]
+        }
+      }
+
+    }
+
+    _ = SerialArray {
+      1
+    }
+
+    _ = SerialArray {
+      1
+      3
+      false
+      ""
+    }
+
+    _ = SerialArray {
+      [1, 2]
+    }
+
+    _ = SerialArray {
+      [1, 2]
+      ["1"]
+    }
+
+    _ = SerialArray {
+
+      for name in ["a", "b"] {
+        name
+      }
+
+    }
+
+    _ = SerialArray {
+
+      if flag {
+        1
+      }
+
+    }
+
+  }
+
+  func test_branch_1() {
+
+    let flag = false
+
+    compare(
+      SerialArray {
+
+        if flag {
+          1
+        }
+
+        1
+      },
+      """
+      [
+        1
+      ]
+      """
+    )
+  }
+
+  func test_branch_2() {
+
+    let flag = false
+
+    compare(
+      SerialArray {
+
+        if flag {
+          1
+        }
+
+        if flag {
+          1
+        } else {
+          2
+        }
+      },
+      """
+      [
+        2
+      ]
+      """
+    )
+
   }
 }
