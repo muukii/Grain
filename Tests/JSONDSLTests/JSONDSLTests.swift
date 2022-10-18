@@ -58,7 +58,7 @@ final class JSONDSLTests: XCTestCase {
   }
     
   func testArray_3() {
-          
+              
     compare(
       JSONArray {
         JSONObject {
@@ -94,11 +94,11 @@ final class JSONDSLTests: XCTestCase {
       let age: Int
       
       var body: some JSONView {
-        JSONObject {
-          JSONMember("name") {
+        Object {
+          Member("name") {
             name
           }
-          JSONMember("age") {
+          Member("age") {
             age
           }
         }
@@ -111,8 +111,8 @@ final class JSONDSLTests: XCTestCase {
       let records: [Record]
       
       var body: some JSONView {
-        JSONObject {
-          JSONMember("results") {
+        Object {
+          Member("results") {
             records
           }
         }
@@ -120,7 +120,7 @@ final class JSONDSLTests: XCTestCase {
       }
       
     }
-    
+        
     let r = Results(records: [
       .init(name: "A", age: 1),
       .init(name: "B", age: 2)

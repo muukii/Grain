@@ -5,6 +5,17 @@ public protocol JSONView: Encodable {
   associatedtype Body: JSONView
   
   @ValueBuilder var body: Body { get }
+  
+}
+
+extension JSONView {
+  
+  public typealias Object = JSONObject
+  public typealias Member = JSONMember
+  public typealias Number = JSONNumber
+  public typealias Null = JSONNull
+  public typealias Boolean = JSONBoolean
+  
 }
 
 extension JSONView {
