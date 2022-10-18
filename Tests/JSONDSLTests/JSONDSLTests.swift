@@ -3,25 +3,117 @@ import XCTest
 @testable import JSONDSL
 
 final class JSONDSLTests: XCTestCase {
-  func testExample() throws {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct
-    // results.
+  
+  let encoder = JSONEncoder()
+  
+  func toString(_ j: some JSONView) -> String {
+    let data = try! encoder.encode(j)
+    return String(data: data, encoding: .utf8)!
+  }
+  
+  func compare(_ j: some JSONView, _ expects: String, file: StaticString = #filePath, line: UInt = #line) {
+    XCTAssertEqual(toString(j), expects, file: file, line: line)
+  }
+  
+  override func setUp() {
+    encoder.outputFormatting = .prettyPrinted
+  }
+  
+  func type<J: JSONView>(@ValueBuilder _ b: () -> J) -> J {
+    b()
+  }
     
-    ///
+  func testArray_1() {
     
-    struct MyComponent: JSONView {
+    compare(
+      JSONArray {
+        1
+      },
+      """
+      [
+        1
+      ]
+      """
+    )
+    
+  }
+  
+  func testArray_2() {
+    
+    compare(
+      JSONArray {
+        1
+        false
+        2.5
+      },
+      """
+      [
+        1,
+        false,
+        2.5
+      ]
+      """
+    )
+    
+  }
+    
+  func testArray_3() {
+          
+    compare(
+      JSONArray {
+        JSONObject {
+          JSONMember("a") {
+            1
+          }
+        }
+        JSONObject {
+          JSONMember("b") {
+            1
+          }
+        }
+      },
+      """
+      [
+        {
+          "a" : 1
+        },
+        {
+          "b" : 1
+        }
+      ]
+      """
+    )
+    
+  }
+  
+  func test_component() throws {
+    
+    struct Record: JSONView {
+      
+      let name: String
+      let age: Int
       
       var body: some JSONView {
         JSONObject {
-          JSONMember("a") {
-            JSONArray {
-              JSONMember("b") {
-                JSONArray {
-                  1
-                }
-              }
-            }
+          JSONMember("name") {
+            name
+          }
+          JSONMember("age") {
+            age
+          }
+        }
+      }
+
+    }
+     
+    struct Results: JSONView {
+      
+      let records: [Record]
+      
+      var body: some JSONView {
+        JSONObject {
+          JSONMember("results") {
+            records
           }
         }
         
@@ -29,51 +121,28 @@ final class JSONDSLTests: XCTestCase {
       
     }
     
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .prettyPrinted
-    
-    let o = JSONObject {
-      
-      JSONMember("a") {
-        JSONArray {
-          JSONMember("b") {
-            JSONArray {
-              1
-              false
-              JSONMember("b") {
-                JSONArray {
-                  1
-                }
-              }
-            }
+    let r = Results(records: [
+      .init(name: "A", age: 1),
+      .init(name: "B", age: 2)
+    ])
+  
+    compare(
+      r,
+      """
+      {
+        "results" : [
+          {
+            "name" : "A",
+            "age" : 1
+          },
+          {
+            "name" : "B",
+            "age" : 2
           }
-        }
+        ]
       }
-      
-      JSONMember("b") {
-        JSONArray {
-          JSONMember("b") {
-            JSONArray {
-              1
-              false
-              JSONMember("b") {
-                JSONArray {
-                  1
-                }
-              }
-            }
-          }
-        }
-      }
-      
-    }
-    
-    let c = MyComponent()
-    
-    let data = try! encoder.encode(o)
-    print(String(data: data, encoding: .utf8)!)
-    
-
+      """
+    )
     
   }
 }

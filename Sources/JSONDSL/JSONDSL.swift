@@ -4,7 +4,7 @@ public protocol JSONView: Encodable {
   
   associatedtype Body: JSONView
   
-  @JSONBuilder var body: Body { get }
+  @ValueBuilder var body: Body { get }
 }
 
 extension JSONView {
@@ -61,17 +61,105 @@ public struct JSONBoolean: JSONView, Encodable {
 
 public struct JSONNumber: JSONView, Encodable {
   
+  public enum Number {
+    case int(Int)
+    case int8(Int8)
+    case int16(Int16)
+    case int32(Int32)
+    case int64(Int64)
+    
+    case uint(UInt)
+    case uint8(UInt8)
+    case uint16(UInt16)
+    case uint32(UInt32)
+    case uint64(UInt64)
+    
+    case float(Float)
+    case double(Double)
+  }
+  
   public typealias Body = Never
   
-  public var value: Int
+  public var value: Number
   
   public init(_ value: Int) {
-    self.value = value
+    self.value = .int(value)
+  }
+  
+  public init(_ value: Int8) {
+    self.value = .int8(value)
+  }
+  
+  public init(_ value: Int16) {
+    self.value = .int16(value)
+  }
+  
+  public init(_ value: Int32) {
+    self.value = .int32(value)
+  }
+  
+  public init(_ value: Int64) {
+    self.value = .int64(value)
+  }
+  
+  public init(_ value: UInt) {
+    self.value = .uint(value)
+  }
+  
+  public init(_ value: UInt8) {
+    self.value = .uint8(value)
+  }
+  
+  public init(_ value: UInt16) {
+    self.value = .uint16(value)
+  }
+  
+  public init(_ value: UInt32) {
+    self.value = .uint32(value)
+  }
+  
+  public init(_ value: UInt64) {
+    self.value = .uint64(value)
+  }
+  
+  public init(_ value: Float) {
+    self.value = .float(value)
+  }
+  
+  public init(_ value: Double) {
+    self.value = .double(value)
   }
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
-    try container.encode(value)
+    
+    switch value {
+    case .int(let value):
+      try container.encode(value)
+    case .int8(let value):
+      try container.encode(value)
+    case .int16(let value):
+      try container.encode(value)
+    case .int32(let value):
+      try container.encode(value)
+    case .int64(let value):
+      try container.encode(value)
+    case .uint(let value):
+      try container.encode(value)
+    case .uint8(let value):
+      try container.encode(value)
+    case .uint16(let value):
+      try container.encode(value)
+    case .uint32(let value):
+      try container.encode(value)
+    case .uint64(let value):
+      try container.encode(value)
+    case .float(let value):
+      try container.encode(value)
+    case .double(let value):
+      try container.encode(value)
+    }
+    
   }
   
 }
@@ -98,8 +186,12 @@ public struct JSONArray: JSONView, Encodable {
   
   public var elements: [any JSONView]
   
-  public init(@JSONBuilder _ elements: () -> [any JSONView]) {
+  public init(@ElementsBuilder _ elements: () -> [any JSONView]) {
     self.elements = elements()
+  }
+      
+  init(elements: [any JSONView]) {
+    self.elements = elements
   }
   
   public func encode(to encoder: Encoder) throws {
@@ -108,48 +200,87 @@ public struct JSONArray: JSONView, Encodable {
       try container.encode($0)
     }
   }
+      
+  @resultBuilder
+  public enum ElementsBuilder {
     
-//  @resultBuilder
-//  public enum Builder {
-//
-//    public static func buildExpression(_ expression: Bool) -> any JSONView {
-//      JSONBoolean(expression)
-//    }
-//
-//    public static func buildExpression(_ expression: Int) -> any JSONView {
-//      JSONNumber(expression)
-//    }
-//
-//    public static func buildExpression(_ expression: String) -> any JSONView {
-//      JSONString(expression)
-//    }
-//
-//    public static func buildExpression(_ expression: any JSONView) -> any JSONView {
-//      expression
-//    }
-//
-//    public static func buildExpression(_ expression: any JSONView) -> any JSONView {
-//      expression
-//    }
-//
-//    public static func buildBlock() -> [any JSONView] {
-//      []
-//    }
-//
-//    public static func buildBlock(_ component: any JSONView) -> [any JSONView] {
-//      [component]
-//    }
-//
-//    public static func buildBlock(_ components: [any JSONView]) -> [any JSONView] {
-//      components
-//    }
-//
-////    public static func buildBlock(_ components: any JSONView...) -> [any JSONView] {
-////      components
-////    }
-//
-//  }
-  
+    public static func buildExpression(_ expression: NSNull) -> JSONNull {
+      .init()
+    }
+    
+    public static func buildExpression(_ expression: String) -> JSONString {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Bool) -> JSONBoolean {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Int) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Int8) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Int16) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Int32) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Int64) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: UInt) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: UInt8) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: UInt16) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: UInt32) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: UInt64) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Float) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression(_ expression: Double) -> JSONNumber {
+      .init(expression)
+    }
+    
+    public static func buildExpression<J: JSONView>(_ component: J) -> J {
+      component
+    }
+    
+    public static func buildBlock() -> JSONEmtpy {
+      .init()
+    }
+           
+    public static func buildBlock(_ components: [any JSONView]) -> [any JSONView] {
+      return components
+    }
+    
+    public static func buildBlock(_ components: any JSONView...) -> [any JSONView] {
+      return components
+    }
+    
+  }
 
 }
 
@@ -159,7 +290,7 @@ public struct JSONObject: JSONView {
   
   public var members: [JSONMember]
   
-  init(@Builder _ members: () -> [JSONMember]) {
+  init(@MemberBuilder _ members: () -> [JSONMember]) {
     self.members = members()
   }
   
@@ -170,7 +301,7 @@ public struct JSONObject: JSONView {
   }
   
   @resultBuilder
-  public enum Builder {
+  public enum MemberBuilder {
     
     public static func buildBlock() -> [JSONMember] {
       []
@@ -206,7 +337,7 @@ public struct JSONMember: JSONView {
   public let name: String
   public let value: any JSONView
   
-  public init(_ name: String, @JSONBuilder value: () -> any JSONView) {
+  public init(_ name: String, @ValueBuilder value: () -> any JSONView) {
     self.name = name
     self.value = value()
   }
@@ -218,27 +349,76 @@ public struct JSONMember: JSONView {
 }
 
 @resultBuilder
-public enum JSONBuilder {
+public enum ValueBuilder {
   
-  public static func buildBlock(_ expression: Bool) -> JSONBoolean {
-    JSONBoolean(expression)
+  public static func buildExpression(_ expression: NSNull) -> JSONNull {
+    .init()
   }
   
-  public static func buildBlock(_ expression: Int) -> JSONNumber {
+  public static func buildExpression(_ expression: String) -> JSONString {
     .init(expression)
   }
   
-//  public static func buildExpression<J: JSONView>(_ component: J) -> J {
-//    component
-//  }
-
-  public static func buildBlock(_ components: [any JSONView]) -> JSONArray {
-    JSONArray.init({ return components })
+  public static func buildExpression(_ expression: Bool) -> JSONBoolean {
+    .init(expression)
   }
   
-  public static func buildBlock(_ components: any JSONView...) -> JSONArray {
-    JSONArray.init({ return components })
+  public static func buildExpression(_ expression: Int) -> JSONNumber {
+    .init(expression)
   }
+  
+  public static func buildExpression(_ expression: Int8) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: Int16) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: Int32) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: Int64) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: UInt) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: UInt8) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: UInt16) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: UInt32) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: UInt64) -> JSONNumber {
+    .init(expression)
+  }
+
+  public static func buildExpression(_ expression: Float) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression(_ expression: Double) -> JSONNumber {
+    .init(expression)
+  }
+  
+  public static func buildExpression<J: JSONView>(_ component: J) -> J {
+    component
+  }
+  
+  public static func buildExpression<J: JSONView>(_ component: [J]) -> JSONArray {
+    .init(elements: component)
+  }
+  
   
   public static func buildBlock() -> JSONEmtpy {
     .init()
@@ -248,4 +428,5 @@ public enum JSONBuilder {
     component
   }
   
+ 
 }
