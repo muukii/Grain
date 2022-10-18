@@ -240,18 +240,18 @@ final class JSONDSLTests: XCTestCase {
       }
 
     }
-         
+
     _ = SerialObject {
-      
+
       [
         SerialMember("1") {
           1
         },
         SerialMember("1") {
           1
-        }
+        },
       ]
-      
+
     }
 
     _ = SerialObject {
@@ -263,11 +263,11 @@ final class JSONDSLTests: XCTestCase {
       }
 
     }
-    
+
     _ = SerialArray {
       1
     }
-    
+
     _ = SerialArray {
       1
       3
@@ -278,10 +278,10 @@ final class JSONDSLTests: XCTestCase {
     _ = SerialArray {
       [1, 2]
     }
-    
+
     _ = SerialArray {
       [1, 2]
-      ["1"]      
+      ["1"]
     }
 
     _ = SerialArray {
@@ -291,36 +291,61 @@ final class JSONDSLTests: XCTestCase {
       }
 
     }
-    
+
     _ = SerialArray {
-      
+
       if flag {
         1
       }
-      
+
     }
-    
-    _ = SerialArray {
-      
-      if flag {
+
+  }
+
+  func test_branch_1() {
+
+    let flag = false
+
+    compare(
+      SerialArray {
+
+        if flag {
+          1
+        }
+
         1
-      }
-      
-      if flag {
+      },
+      """
+      [
         1
-      } else {
+      ]
+      """
+    )
+  }
+
+  func test_branch_2() {
+
+    let flag = false
+
+    compare(
+      SerialArray {
+
+        if flag {
+          1
+        }
+
+        if flag {
+          1
+        } else {
+          2
+        }
+      },
+      """
+      [
         2
-      }
-    }
-    
-    _ = SerialArray {
-      
-      if flag {
-        1
-      }
-      
-      1
-    }
+      ]
+      """
+    )
 
   }
 }

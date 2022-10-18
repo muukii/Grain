@@ -216,23 +216,49 @@ public struct SerialString: SerialView, Encodable {
   
 }
 
-public struct SerialArray: SerialView, Encodable {
+public struct SerialGroup: SerialView {
+  
+  public typealias Body = Never
+  public var elements: [any SerialView]
+  
+  public func encode(to encoder: Encoder) throws {
+    try elements.forEach {
+      try $0.encode(to: encoder)
+    }
+  }
+  
+//  public func flattened() -> SerialGroup {
+//
+//    for element in elements {
+//      if let group = element as? SerialGroup {
+//        group.elements
+//      }
+//    }
+//
+//  }
+}
+
+public struct SerialArray: SerialView {
   
   public typealias Body = Never
   
-  public var elements: [any SerialView]
+  public var group: SerialGroup
   
-  public init(@ElementsBuilder _ elements: () -> [any SerialView]) {
-    self.elements = elements()
+  public init(@ElementsBuilder _ elements: () -> SerialGroup) {
+    self.group = elements()
   }
       
   init(elements: [any SerialView]) {
-    self.elements = elements
+    self.group = .init(elements: elements)
   }
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.unkeyedContainer()
-    try elements.forEach {
+    print(group)
+    try group.elements.forEach {
+      if let nestedGroup = $0 as? SerialGroup, nestedGroup.elements.isEmpty {
+        return
+      }
       try container.encode($0)
     }
   }
@@ -240,7 +266,7 @@ public struct SerialArray: SerialView, Encodable {
   @resultBuilder
   public enum ElementsBuilder {
     
-    public typealias Component = [any SerialView]
+    public typealias Component = SerialGroup
     
     public static func buildExpression(_ expression: NSNull) -> SerialNull {
       .init()
@@ -367,27 +393,23 @@ public struct SerialArray: SerialView, Encodable {
     }
     
     public static func buildBlock() -> Component {
-      []
+      .init(elements: [])
     }
            
-//    public static func buildBlock(_ components: Component) -> Component {
-//      return components
-//    }
-//
     public static func buildBlock(_ components: Component...) -> Component {
-      return components.flatMap { $0 }
+      return .init(elements: components.flatMap { $0.elements })
     }
         
     public static func buildBlock(_ components: any SerialView...) -> Component {
-      return components
+      return .init(elements: components)
     }
         
     public static func buildArray(_ components: [Component]) -> Component {
-      return components.flatMap { $0 }
+      return .init(elements: components.flatMap { $0.elements })
     }
     
     public static func buildOptional(_ component: Component?) -> Component {
-      return component ?? []
+      return component ?? .init(elements: [])
     }
     
     public static func buildEither(first component: Component) -> Component {
