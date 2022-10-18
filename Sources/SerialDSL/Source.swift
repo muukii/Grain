@@ -26,9 +26,10 @@ extension SerialView {
   }
   
   /// Renders data as JSON in String
-  public func render() -> String {
+  public func renderJSON() -> String {
     
     let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     let data = try! encoder.encode(self)
     return String(data: data, encoding: .utf8)!
   }

@@ -147,6 +147,7 @@ final class JSONDSLTests: XCTestCase {
       .init(name: "A", age: 1),
       .init(name: "B", age: 2),
     ])
+    
 
     compare(
       r,
