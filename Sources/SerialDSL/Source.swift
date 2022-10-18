@@ -254,7 +254,6 @@ public struct SerialArray: SerialView {
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.unkeyedContainer()
-    print(group)
     try group.elements.forEach {
       if let nestedGroup = $0 as? SerialGroup, nestedGroup.elements.isEmpty {
         return
