@@ -391,60 +391,120 @@ public enum ValueBuilder {
     .init()
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == NSNull {
+    .init(elements: expression.map { _ in SerialNull() })
+  }
+  
   public static func buildExpression(_ expression: String) -> SerialString {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == String {
+    .init(elements: expression.map { SerialString($0) })
   }
   
   public static func buildExpression(_ expression: Bool) -> SerialBoolean {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Bool {
+    .init(elements: expression.map { SerialBoolean($0) })
+  }
+  
   public static func buildExpression(_ expression: Int) -> SerialNumber {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int {
+    .init(elements: expression.map { SerialNumber($0) })
   }
   
   public static func buildExpression(_ expression: Int8) -> SerialNumber {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int8 {
+    .init(elements: expression.map { SerialNumber($0) })
+  }
+  
   public static func buildExpression(_ expression: Int16) -> SerialNumber {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int16 {
+    .init(elements: expression.map { SerialNumber($0) })
   }
   
   public static func buildExpression(_ expression: Int32) -> SerialNumber {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int32 {
+    .init(elements: expression.map { SerialNumber($0) })
+  }
+  
   public static func buildExpression(_ expression: Int64) -> SerialNumber {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int64 {
+    .init(elements: expression.map { SerialNumber($0) })
   }
   
   public static func buildExpression(_ expression: UInt) -> SerialNumber {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt {
+    .init(elements: expression.map { SerialNumber($0) })
+  }
+  
   public static func buildExpression(_ expression: UInt8) -> SerialNumber {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt8 {
+    .init(elements: expression.map { SerialNumber($0) })
   }
   
   public static func buildExpression(_ expression: UInt16) -> SerialNumber {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt16 {
+    .init(elements: expression.map { SerialNumber($0) })
+  }
+  
   public static func buildExpression(_ expression: UInt32) -> SerialNumber {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt32 {
+    .init(elements: expression.map { SerialNumber($0) })
+  }
+  
   public static func buildExpression(_ expression: UInt64) -> SerialNumber {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt64 {
+    .init(elements: expression.map { SerialNumber($0) })
   }
 
   public static func buildExpression(_ expression: Float) -> SerialNumber {
     .init(expression)
   }
   
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Float {
+    .init(elements: expression.map { SerialNumber($0) })
+  }
+  
   public static func buildExpression(_ expression: Double) -> SerialNumber {
     .init(expression)
+  }
+  
+  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Double {
+    .init(elements: expression.map { SerialNumber($0) })
   }
   
   public static func buildExpression<J: SerialView>(_ component: J) -> J {

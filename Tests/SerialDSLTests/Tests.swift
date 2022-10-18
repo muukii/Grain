@@ -168,4 +168,25 @@ final class JSONDSLTests: XCTestCase {
     )
 
   }
+  
+  func test_array() {
+    
+    compare(
+      SerialObject {
+        SerialMember("a") {
+          ["a", "b"]
+        }
+      },
+      """
+      {
+        "a" : [
+          "a",
+          "b"
+        ]
+      }
+      """
+    )
+
+    
+  }
 }
