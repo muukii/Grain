@@ -240,103 +240,166 @@ public struct SerialArray: SerialView, Encodable {
   @resultBuilder
   public enum ElementsBuilder {
     
+    public typealias Component = [any SerialView]
+    
     public static func buildExpression(_ expression: NSNull) -> SerialNull {
       .init()
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == NSNull {
+      .init(elements: expression.map { _ in SerialNull() })
     }
     
     public static func buildExpression(_ expression: String) -> SerialString {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == String {
+      .init(elements: expression.map { SerialString($0) })
+    }
+    
     public static func buildExpression(_ expression: Bool) -> SerialBoolean {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Bool {
+      .init(elements: expression.map { SerialBoolean($0) })
     }
     
     public static func buildExpression(_ expression: Int) -> SerialNumber {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int {
+      .init(elements: expression.map { SerialNumber($0) })
+    }
+    
     public static func buildExpression(_ expression: Int8) -> SerialNumber {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int8 {
+      .init(elements: expression.map { SerialNumber($0) })
     }
     
     public static func buildExpression(_ expression: Int16) -> SerialNumber {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int16 {
+      .init(elements: expression.map { SerialNumber($0) })
+    }
+    
     public static func buildExpression(_ expression: Int32) -> SerialNumber {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int32 {
+      .init(elements: expression.map { SerialNumber($0) })
     }
     
     public static func buildExpression(_ expression: Int64) -> SerialNumber {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int64 {
+      .init(elements: expression.map { SerialNumber($0) })
+    }
+    
     public static func buildExpression(_ expression: UInt) -> SerialNumber {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt {
+      .init(elements: expression.map { SerialNumber($0) })
     }
     
     public static func buildExpression(_ expression: UInt8) -> SerialNumber {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt8 {
+      .init(elements: expression.map { SerialNumber($0) })
+    }
+    
     public static func buildExpression(_ expression: UInt16) -> SerialNumber {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt16 {
+      .init(elements: expression.map { SerialNumber($0) })
     }
     
     public static func buildExpression(_ expression: UInt32) -> SerialNumber {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt32 {
+      .init(elements: expression.map { SerialNumber($0) })
+    }
+    
     public static func buildExpression(_ expression: UInt64) -> SerialNumber {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt64 {
+      .init(elements: expression.map { SerialNumber($0) })
     }
     
     public static func buildExpression(_ expression: Float) -> SerialNumber {
       .init(expression)
     }
     
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Float {
+      .init(elements: expression.map { SerialNumber($0) })
+    }
+    
     public static func buildExpression(_ expression: Double) -> SerialNumber {
       .init(expression)
+    }
+    
+    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Double {
+      .init(elements: expression.map { SerialNumber($0) })
     }
     
     public static func buildExpression<J: SerialView>(_ component: J) -> J {
       component
     }
     
-    public static func buildBlock() -> SerialEmtpy {
-      .init()
+    public static func buildBlock() -> Component {
+      []
     }
            
-    public static func buildBlock(_ components: [any SerialView]) -> [any SerialView] {
+//    public static func buildBlock(_ components: Component) -> Component {
+//      return components
+//    }
+//
+    public static func buildBlock(_ components: Component...) -> Component {
+      return components.flatMap { $0 }
+    }
+        
+    public static func buildBlock(_ components: any SerialView...) -> Component {
       return components
     }
-    
-    public static func buildBlock(_ components: any SerialView...) -> [any SerialView] {
-      return components
+        
+    public static func buildArray(_ components: [Component]) -> Component {
+      return components.flatMap { $0 }
     }
     
-    public static func buildArray<T: SerialView>(_ components: [T]) -> [T] {
-      return components
+    public static func buildOptional(_ component: Component?) -> Component {
+      return component ?? []
     }
     
-    public static func buildOptional<T: SerialView>(_ component: T?) -> any SerialView {
-      guard let component else {
-        return SerialNull()
-      }
+    public static func buildEither(first component: Component) -> Component {
       return component
     }
     
-    public static func buildEither<T: SerialView>(first component: T) -> T {
-      component
+    public static func buildEither(second component: Component) -> Component {
+      return component
     }
     
-    public static func buildEither<T: SerialView>(second component: T) -> T {
-      component
-    }
-    
-    public static func buildLimitedAvailability<T: SerialView>(_ component: T) -> T {
-      component
+    public static func buildLimitedAvailability(_ component: Component) -> Component {
+      return component
     }
     
   }
@@ -362,35 +425,46 @@ public struct SerialObject: SerialView {
   @resultBuilder
   public enum MemberBuilder {
     
-    public static func buildBlock() -> [SerialMember] {
+    public typealias Element = SerialMember
+ 
+    public static func buildBlock() -> [Element] {
       []
     }
     
-    public static func buildBlock(_ component: SerialMember...) -> [SerialMember] {
-      component
+    public static func buildBlock<C: Collection>(_ contents: C...) -> [Element] where C.Element == Element {
+      return contents.flatMap { $0 }
     }
     
-    public static func buildArray(_ components: [SerialMember]) -> [SerialMember] {
-      return components
+    public static func buildOptional(_ component: [Element]?) -> [Element] {
+      return component ?? []
     }
     
-    public static func buildOptional(_ component: SerialMember?) -> [SerialMember] {
-      guard let component else {
-        return []
-      }
-      return [component]
+    public static func buildEither(first component: [Element]) -> [Element] {
+      return component
     }
     
-    public static func buildEither(first component: SerialMember) -> SerialMember {
-      component
+    public static func buildEither(second component: [Element]) -> [Element] {
+      return component
     }
     
-    public static func buildEither(second component: SerialMember) -> SerialMember {
-      component
+    public static func buildArray(_ components: [[Element]]) -> [Element] {
+      components.flatMap { $0 }
     }
     
-    public static func buildLimitedAvailability(_ component: SerialMember) -> SerialMember {
-      component
+    public static func buildExpression(_ element: Element?) -> [Element] {
+      return element.map { [$0] } ?? []
+    }
+    
+    public static func buildExpression(_ element: Element) -> [Element] {
+      return [element]
+    }
+    
+    public static func buildExpression<C: Sequence>(_ elements: C) -> [C.Element] where C.Element == Element {
+      Swift.Array(elements)
+    }
+
+    public static func buildExpression<C: Sequence>(_ elements: C) -> [Element] where C.Element == Optional<Element> {
+      elements.compactMap { $0 }
     }
     
   }
