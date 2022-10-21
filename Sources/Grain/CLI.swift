@@ -5,42 +5,6 @@ import TSCUtility
 
 let RUNTIME_NAME = "GrainDescriptor"
 
-enum Log {
-  
-  static func debug(
-    file: StaticString = #file,
-    line: UInt = #line,
-    _ log: OSLog,
-    _ object: @autoclosure () -> Any
-  ) {
-    print(object())
-  }
-  
-  static func error(
-    file: StaticString = #file,
-    line: UInt = #line,
-    _ log: OSLog,
-    _ object: @autoclosure () -> Any
-  ) {
-    os_log(.info, log: log, "%{public}@\n%{public}@:%{public}@", "\(object())", "\(file)", "\(line.description)")
-  }
-  
-}
-
-extension OSLog {
-  
-  @inline(__always)
-  private static func makeOSLogInDebug(isEnabled: Bool = true, _ factory: () -> OSLog) -> OSLog {
-#if DEBUG
-    return factory()
-#else
-    return .disabled
-#endif
-  }
-  
-  static let generic: OSLog = makeOSLogInDebug { OSLog.init(subsystem: "app.muukii", category: "generic") }
-}
-
 struct CLIError: Swift.Error, LocalizedError, Equatable {
 
   var errorDescription: String?
@@ -51,10 +15,21 @@ struct CLIError: Swift.Error, LocalizedError, Equatable {
 }
 
 struct CLI: AsyncParsableCommand {
+  
+  static var configuration: CommandConfiguration {
+    .init(
+      commandName: "Grain",
+      abstract: "",
+      usage: "",
+      version: "---",
+      shouldDisplay: true,
+      subcommands: [Render.self],
+      defaultSubcommand: Render.self,
+      helpNames: .long
+    )
+  }
 
-  static var configuration: CommandConfiguration = .init(subcommands: [Gen.self])
-
-  struct Gen: AsyncParsableCommand {
+  struct Render: AsyncParsableCommand {
     
     struct DomainError: Swift.Error, LocalizedError, Equatable {
       
@@ -107,10 +82,10 @@ struct CLI: AsyncParsableCommand {
         }
       }
       
-//      Log.debug(.generic, """
-//applicationPath: \(applicationPath)
-//runtimeFrameworksPath: \(runtimeFrameworksPath)
-//""")
+      Log.debug("""
+applicationPath: \(applicationPath)
+runtimeFrameworksPath: \(runtimeFrameworksPath)
+""")
 
       guard localFileSystem.exists(libraryPath) else {
         throw CLIError.runtimeNotFound
@@ -169,7 +144,7 @@ struct CLI: AsyncParsableCommand {
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
             let output = try result.utf8stderrOutput()
-            Log.debug(.generic, "\(output)\n\(cmd.joined(separator: " "))")
+            Log.error("\(output)\n\(cmd.joined(separator: " "))")
             throw DomainError.failedToCompile
           }
           
@@ -198,7 +173,7 @@ struct CLI: AsyncParsableCommand {
           if result.exitStatus != .terminated(code: 0) {
             
             let output = try result.utf8stderrOutput()
-            Log.debug(.generic, "\(output)\n\(cmd.joined(separator: " "))")
+            Log.error("\(output)\n\(cmd.joined(separator: " "))")
             
             throw DomainError.failureInMakingOutput
           }
