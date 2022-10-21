@@ -69,7 +69,8 @@ struct CLI: AsyncParsableCommand {
         }
       }
 
-      guard localFileSystem.exists(runtimeFrameworksPath) else {
+      guard localFileSystem.exists(libraryPath) else {
+        print(applicationPath, runtimeFrameworksPath, libraryPath)
         throw CLIError.runtimeNotFound
       }
 
