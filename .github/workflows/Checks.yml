@@ -36,7 +36,7 @@ jobs:
       - name: Install grain
         run: mint install muukii/grain@${{ github.sha }}
       - name: Run
-        run: /Users/runner/.mint/bin/grain
+        run: /Users/runner/.mint/bin/grain fixtures/openapi.swift
       
   test:
     runs-on: macos-12
