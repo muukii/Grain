@@ -70,7 +70,7 @@ struct CLI: AsyncParsableCommand {
       }
 
       guard localFileSystem.exists(libraryPath) else {
-        print(CommandLine.arguments[0])
+        print(CommandLine.arguments[0], try? AbsolutePath(validating: CommandLine.arguments[0]).parentDirectory)
         throw CLIError.runtimeNotFound
       }
 
