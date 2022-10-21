@@ -1,3 +1,6 @@
+import SerialDSL
+import Foundation
+
 struct Record: SerialView {
   
   let name: String
@@ -25,6 +28,21 @@ struct Results: SerialView {
       Member("results") {
         records
       }
+    }
+  }
+  
+}
+
+let results = Results(records: [
+  .init(name: "A", age: 1),
+  .init(name: "B", age: 2),
+])
+
+serialize {
+  
+  SerialObject {
+    SerialMember("data") {
+      results
     }
   }
   
