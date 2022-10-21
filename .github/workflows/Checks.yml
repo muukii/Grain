@@ -49,10 +49,10 @@ jobs:
         with:
           submodules: true
       - name: Test
-        run: xcodebuild -scheme GrainDescriptorTests test -sdk macosx -destination 'platform=macos' -derivedDataPath ./DerivedData | xcpretty
+        run: xcodebuild -scheme GrainDescriptorTests test -resultBundlePath TestResults -sdk macosx -destination 'platform=macos' -derivedDataPath ./DerivedData | xcpretty
 
       - uses: kishikawakatsumi/xcresulttool@v1
         with:
           path: |
-            results/SerialDSL.xcresult
+            TestResults.xcresult
         if: success() || failure()
