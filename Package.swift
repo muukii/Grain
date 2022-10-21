@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
   name: "Grain",
   platforms: [
-    .macOS(.v10_15),
+    .macOS(.v12),
     .iOS(.v13),
   ],
   products: [
@@ -19,11 +19,14 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.0"),
     .package(url: "https://github.com/apple/swift-tools-support-core.git", from: "0.2.7"),
+    .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.6.2")
   ],
   targets: [
     .target(
       name: "GrainDescriptor",
-      dependencies: [],
+      dependencies: [
+        "Alamofire"
+      ],
       swiftSettings: [
         .unsafeFlags(["-enable-library-evolution"])
       ]
