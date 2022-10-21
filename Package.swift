@@ -14,7 +14,7 @@ let package = Package(
       type: .dynamic,
       targets: ["GrainDescriptor"]
     ),
-    .executable(name: "grain", targets: ["Grain", "GrainDescriptor"])
+    .executable(name: "grain", targets: ["Grain", "GrainDescriptor"]),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.0"),

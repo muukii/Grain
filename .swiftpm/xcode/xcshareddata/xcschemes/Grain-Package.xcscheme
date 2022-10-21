@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SerialDSL"
-               BuildableName = "SerialDSL"
-               BlueprintName = "SerialDSL"
+               BlueprintIdentifier = "GrainDescriptor"
+               BuildableName = "GrainDescriptor"
+               BlueprintName = "GrainDescriptor"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Serial"
-               BuildableName = "Serial"
-               BlueprintName = "Serial"
+               BlueprintIdentifier = "grain"
+               BuildableName = "grain"
+               BlueprintName = "grain"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,9 +42,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SerialDSLTests"
-               BuildableName = "SerialDSLTests"
-               BlueprintName = "SerialDSLTests"
+               BlueprintIdentifier = "GrainDescriptorTests"
+               BuildableName = "GrainDescriptorTests"
+               BlueprintName = "GrainDescriptorTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Grain"
+               BuildableName = "Grain"
+               BlueprintName = "Grain"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -60,9 +74,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SerialDSLTests"
-               BuildableName = "SerialDSLTests"
-               BlueprintName = "SerialDSLTests"
+               BlueprintIdentifier = "GrainDescriptorTests"
+               BuildableName = "GrainDescriptorTests"
+               BlueprintName = "GrainDescriptorTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -81,9 +95,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Serial"
-            BuildableName = "Serial"
-            BlueprintName = "Serial"
+            BlueprintIdentifier = "grain"
+            BuildableName = "grain"
+            BlueprintName = "grain"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
@@ -97,9 +111,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Serial"
-            BuildableName = "Serial"
-            BlueprintName = "Serial"
+            BlueprintIdentifier = "grain"
+            BuildableName = "grain"
+            BlueprintName = "grain"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
