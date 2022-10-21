@@ -38,6 +38,8 @@ From [mint 🌱](https://github.com/yonaskolb/Mint)
 mint install muukii/Grain
 ```
 
+other installation ways will be added in the future
+
 ## Overview
 
 ```sh
