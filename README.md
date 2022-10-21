@@ -18,6 +18,13 @@ The advantages of using Swift are:
 - type checking by Swift compiler
 - validating the data
 
+## Inspireations of using Grain
+
+- Writing OpenAPI Specification and using by rendering
+- Writing JSON Schema
+- Writing a complex XcodeGen configuration beyond its built-in expressions
+- Managing mocking APNs files
+- and more there are a lot of opportunities of using Grain where are using JSON.
 
 ## Naming
 
