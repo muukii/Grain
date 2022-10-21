@@ -107,10 +107,10 @@ struct CLI: AsyncParsableCommand {
         }
       }
       
-      Log.debug(.generic, """
-applicationPath: \(applicationPath)
-runtimeFrameworksPath: \(runtimeFrameworksPath)
-""")
+//      Log.debug(.generic, """
+//applicationPath: \(applicationPath)
+//runtimeFrameworksPath: \(runtimeFrameworksPath)
+//""")
 
       guard localFileSystem.exists(libraryPath) else {
         throw CLIError.runtimeNotFound
