@@ -6,13 +6,13 @@ final class JSONDSLTests: XCTestCase {
 
   let encoder = JSONEncoder()
 
-  func toString(_ j: some SerialView) -> String {
+  func toString(_ j: some GrainView) -> String {
     let data = try! encoder.encode(j)
     return String(data: data, encoding: .utf8)!
   }
 
   func compare(
-    _ j: some SerialView,
+    _ j: some GrainView,
     _ expects: String,
     file: StaticString = #filePath,
     line: UInt = #line
@@ -24,14 +24,14 @@ final class JSONDSLTests: XCTestCase {
     encoder.outputFormatting = .prettyPrinted
   }
 
-  func type<J: SerialView>(@ValueBuilder _ b: () -> J) -> J {
+  func type<J: GrainView>(@GrainBuilder _ b: () -> J) -> J {
     b()
   }
 
   func testArray_1() {
 
     compare(
-      SerialArray {
+      GrainArray {
         1
       },
       """
@@ -46,7 +46,7 @@ final class JSONDSLTests: XCTestCase {
   func testArray_2() {
 
     compare(
-      SerialArray {
+      GrainArray {
         1
         false
         2.5
@@ -65,14 +65,14 @@ final class JSONDSLTests: XCTestCase {
   func testArray_3() {
 
     compare(
-      SerialArray {
-        SerialObject {
-          SerialMember("a") {
+      GrainArray {
+        GrainObject {
+          GrainMember("a") {
             1
           }
         }
-        SerialObject {
-          SerialMember("b") {
+        GrainObject {
+          GrainMember("b") {
             1
           }
         }
@@ -94,9 +94,9 @@ final class JSONDSLTests: XCTestCase {
   func test_null() {
 
     compare(
-      SerialObject {
-        SerialMember("a") {
-          SerialNull()
+      GrainObject {
+        GrainMember("a") {
+          GrainNull()
         }
       },
       """
@@ -110,17 +110,17 @@ final class JSONDSLTests: XCTestCase {
 
   func test_component() throws {
 
-    struct Record: SerialView {
+    struct Record: GrainView {
 
       let name: String
       let age: Int
 
-      var body: some SerialView {
-        Object {
-          Member("name") {
+      var body: some GrainView {
+        GrainObject {
+          GrainMember("name") {
             name
           }
-          Member("age") {
+          GrainMember("age") {
             age
           }
         }
@@ -128,13 +128,13 @@ final class JSONDSLTests: XCTestCase {
 
     }
 
-    struct Results: SerialView {
+    struct Results: GrainView {
 
       let records: [Record]
 
-      var body: some SerialView {
-        Object {
-          Member("results") {
+      var body: some GrainView {
+        GrainObject {
+          GrainMember("results") {
             records
           }
         }
@@ -171,8 +171,8 @@ final class JSONDSLTests: XCTestCase {
   func test_array() {
 
     compare(
-      SerialObject {
-        SerialMember("a") {
+      GrainObject {
+        GrainMember("a") {
           ["a", "b"]
         }
       },
@@ -191,9 +191,9 @@ final class JSONDSLTests: XCTestCase {
   func test_loop() {
 
     compare(
-      SerialObject {
+      GrainObject {
         for name in ["a", "b"] {
-          SerialMember(name) {
+          GrainMember(name) {
             ["a", "b"]
           }
         }
@@ -217,74 +217,74 @@ final class JSONDSLTests: XCTestCase {
 
     let flag = false
 
-    _ = SerialObject {
+    _ = GrainObject {
 
       if flag {
-        SerialMember("1") {
+        GrainMember("1") {
           1
         }
       }
 
     }
 
-    _ = SerialObject {
+    _ = GrainObject {
 
       if flag {
-        SerialMember("1") {
+        GrainMember("1") {
           1
         }
       }
 
-      SerialMember("1") {
+      GrainMember("1") {
         1
       }
 
     }
 
-    _ = SerialObject {
+    _ = GrainObject {
 
       [
-        SerialMember("1") {
+        GrainMember("1") {
           1
         },
-        SerialMember("1") {
+        GrainMember("1") {
           1
         },
       ]
 
     }
 
-    _ = SerialObject {
+    _ = GrainObject {
 
       for name in ["a", "b"] {
-        SerialMember(name) {
+        GrainMember(name) {
           ["a", "b"]
         }
       }
 
     }
 
-    _ = SerialArray {
+    _ = GrainArray {
       1
     }
 
-    _ = SerialArray {
+    _ = GrainArray {
       1
       3
       false
       ""
     }
 
-    _ = SerialArray {
+    _ = GrainArray {
       [1, 2]
     }
 
-    _ = SerialArray {
+    _ = GrainArray {
       [1, 2]
       ["1"]
     }
 
-    _ = SerialArray {
+    _ = GrainArray {
 
       for name in ["a", "b"] {
         name
@@ -292,7 +292,7 @@ final class JSONDSLTests: XCTestCase {
 
     }
 
-    _ = SerialArray {
+    _ = GrainArray {
 
       if flag {
         1
@@ -307,7 +307,7 @@ final class JSONDSLTests: XCTestCase {
     let flag = false
 
     compare(
-      SerialArray {
+      GrainArray {
 
         if flag {
           1
@@ -328,7 +328,7 @@ final class JSONDSLTests: XCTestCase {
     let flag = false
 
     compare(
-      SerialArray {
+      GrainArray {
 
         if flag {
           1

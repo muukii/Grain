@@ -1,12 +1,12 @@
 import GrainDescriptor
 import Foundation
 
-struct Record: SerialView {
+struct Record: GrainView {
   
   let name: String
   let age: Int
   
-  var body: some SerialView {
+  var body: some GrainView {
     Object {
       Member("name") {
         name
@@ -19,11 +19,11 @@ struct Record: SerialView {
   
 }
 
-struct Results: SerialView {
+struct Results: GrainView {
   
   let records: [Record]
   
-  var body: some SerialView {
+  var body: some GrainView {
     Object {
       Member("results") {
         records
@@ -40,8 +40,8 @@ let results = Results(records: [
 
 serialize {
   
-  SerialObject {
-    SerialMember("data") {
+  GrainObject {
+    GrainMember("data") {
       results
     }
   }

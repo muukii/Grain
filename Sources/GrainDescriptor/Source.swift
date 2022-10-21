@@ -1,25 +1,14 @@
 import Foundation
 
-public protocol SerialView: Encodable {
+public protocol GrainView: Encodable {
   
-  associatedtype Body: SerialView
+  associatedtype Body: GrainView
   
-  @ValueBuilder var body: Body { get }
-  
-}
-
-extension SerialView {
-  
-  public typealias Object = SerialObject
-  public typealias Member = SerialMember
-  public typealias Number = SerialNumber
-  public typealias Null = SerialNull
-  public typealias Boolean = SerialBoolean
-  public typealias Array = SerialArray
+  @GrainBuilder var body: Body { get }
   
 }
 
-extension SerialView {
+extension GrainView {
   
   public func encode(to encoder: Encoder) throws {
     try body.encode(to: encoder)
@@ -36,7 +25,7 @@ extension SerialView {
   
 }
 
-extension SerialView where Body == Never {
+extension GrainView where Body == Never {
   
   @_spi(JSONNever)
   public var body: Body {
@@ -45,15 +34,15 @@ extension SerialView where Body == Never {
   
 }
 
-extension Never: SerialView {
+extension Never: GrainView {
   
   @_spi(JSONNever)
-  public var body: SerialEmtpy {
-    return SerialEmtpy()
+  public var body: GrainEmpty {
+    return GrainEmpty()
   }
 }
 
-public struct SerialEmtpy: SerialView, Decodable {
+public struct GrainEmpty: GrainView, Decodable {
   
   public typealias Body = Never
   
@@ -66,7 +55,7 @@ public struct SerialEmtpy: SerialView, Decodable {
   }
 }
 
-public struct SerialNull: SerialView {
+public struct GrainNull: GrainView {
   public typealias Body = Never
   
   public init() {
@@ -79,7 +68,7 @@ public struct SerialNull: SerialView {
   }
 }
 
-public struct SerialBoolean: SerialView, Encodable {
+public struct GrainBool: GrainView, Encodable {
   
   public typealias Body = Never
   
@@ -95,9 +84,9 @@ public struct SerialBoolean: SerialView, Encodable {
   }
 }
 
-public struct SerialNumber: SerialView, Encodable {
+public struct GrainNumber: GrainView, Encodable {
   
-  public enum Number {
+  public enum NumberNode {
     case int(Int)
     case int8(Int8)
     case int16(Int16)
@@ -116,7 +105,7 @@ public struct SerialNumber: SerialView, Encodable {
   
   public typealias Body = Never
   
-  public var value: Number
+  public var value: NumberNode
   
   public init(_ value: Int) {
     self.value = .int(value)
@@ -200,7 +189,7 @@ public struct SerialNumber: SerialView, Encodable {
   
 }
 
-public struct SerialString: SerialView, Encodable {
+public struct GrainString: GrainView, Encodable {
   public typealias Body = Never
   
   public var value: String
@@ -216,10 +205,10 @@ public struct SerialString: SerialView, Encodable {
   
 }
 
-public struct SerialGroup: SerialView {
+public struct GrainGroup: GrainView {
   
   public typealias Body = Never
-  public var elements: [any SerialView]
+  public var elements: [any GrainView]
   
   public func encode(to encoder: Encoder) throws {
     try elements.forEach {
@@ -238,24 +227,24 @@ public struct SerialGroup: SerialView {
 //  }
 }
 
-public struct SerialArray: SerialView {
+public struct GrainArray: GrainView {
   
   public typealias Body = Never
   
-  public var group: SerialGroup
+  public var group: GrainGroup
   
-  public init(@ElementsBuilder _ elements: () -> SerialGroup) {
+  public init(@ElementsBuilder _ elements: () -> GrainGroup) {
     self.group = elements()
   }
       
-  init(elements: [any SerialView]) {
+  init(elements: [any GrainView]) {
     self.group = .init(elements: elements)
   }
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.unkeyedContainer()
     try group.elements.forEach {
-      if let nestedGroup = $0 as? SerialGroup, nestedGroup.elements.isEmpty {
+      if let nestedGroup = $0 as? GrainGroup, nestedGroup.elements.isEmpty {
         return
       }
       try container.encode($0)
@@ -265,129 +254,129 @@ public struct SerialArray: SerialView {
   @resultBuilder
   public enum ElementsBuilder {
     
-    public typealias Component = SerialGroup
+    public typealias Component = GrainGroup
     
-    public static func buildExpression(_ expression: NSNull) -> SerialNull {
+    public static func buildExpression(_ expression: NSNull) -> GrainNull {
       .init()
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == NSNull {
-      .init(elements: expression.map { _ in SerialNull() })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == NSNull {
+      .init(elements: expression.map { _ in GrainNull() })
     }
     
-    public static func buildExpression(_ expression: String) -> SerialString {
+    public static func buildExpression(_ expression: String) -> GrainString {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == String {
-      .init(elements: expression.map { SerialString($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == String {
+      .init(elements: expression.map { GrainString($0) })
     }
     
-    public static func buildExpression(_ expression: Bool) -> SerialBoolean {
+    public static func buildExpression(_ expression: Bool) -> GrainBool {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Bool {
-      .init(elements: expression.map { SerialBoolean($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Bool {
+      .init(elements: expression.map { GrainBool($0) })
     }
     
-    public static func buildExpression(_ expression: Int) -> SerialNumber {
+    public static func buildExpression(_ expression: Int) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: Int8) -> SerialNumber {
+    public static func buildExpression(_ expression: Int8) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int8 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int8 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: Int16) -> SerialNumber {
+    public static func buildExpression(_ expression: Int16) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int16 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int16 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: Int32) -> SerialNumber {
+    public static func buildExpression(_ expression: Int32) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int32 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int32 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: Int64) -> SerialNumber {
+    public static func buildExpression(_ expression: Int64) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int64 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int64 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: UInt) -> SerialNumber {
+    public static func buildExpression(_ expression: UInt) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: UInt8) -> SerialNumber {
+    public static func buildExpression(_ expression: UInt8) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt8 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt8 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: UInt16) -> SerialNumber {
+    public static func buildExpression(_ expression: UInt16) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt16 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt16 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: UInt32) -> SerialNumber {
+    public static func buildExpression(_ expression: UInt32) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt32 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt32 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: UInt64) -> SerialNumber {
+    public static func buildExpression(_ expression: UInt64) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt64 {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt64 {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: Float) -> SerialNumber {
+    public static func buildExpression(_ expression: Float) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Float {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Float {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression(_ expression: Double) -> SerialNumber {
+    public static func buildExpression(_ expression: Double) -> GrainNumber {
       .init(expression)
     }
     
-    public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Double {
-      .init(elements: expression.map { SerialNumber($0) })
+    public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Double {
+      .init(elements: expression.map { GrainNumber($0) })
     }
     
-    public static func buildExpression<J: SerialView>(_ component: J) -> J {
+    public static func buildExpression<J: GrainView>(_ component: J) -> J {
       component
     }
     
@@ -399,7 +388,7 @@ public struct SerialArray: SerialView {
       return .init(elements: components.flatMap { $0.elements })
     }
         
-    public static func buildBlock(_ components: any SerialView...) -> Component {
+    public static func buildBlock(_ components: any GrainView...) -> Component {
       return .init(elements: components)
     }
         
@@ -427,13 +416,13 @@ public struct SerialArray: SerialView {
 
 }
 
-public struct SerialObject: SerialView {
+public struct GrainObject: GrainView {
   
   public typealias Body = Never
   
-  public var members: [SerialMember]
+  public var members: [GrainMember]
   
-  public init(@MemberBuilder _ members: () -> [SerialMember]) {
+  public init(@MemberBuilder _ members: () -> [GrainMember]) {
     self.members = members()
   }
   
@@ -446,7 +435,7 @@ public struct SerialObject: SerialView {
   @resultBuilder
   public enum MemberBuilder {
     
-    public typealias Element = SerialMember
+    public typealias Element = GrainMember
  
     public static func buildBlock() -> [Element] {
       []
@@ -492,7 +481,7 @@ public struct SerialObject: SerialView {
   
 }
 
-public struct SerialMember: SerialView {
+public struct GrainMember: GrainView {
   
   public typealias Body = Never
   
@@ -512,9 +501,9 @@ public struct SerialMember: SerialView {
   }
   
   public let name: String
-  public let value: any SerialView
+  public let value: any GrainView
   
-  public init(_ name: String, @ValueBuilder value: () -> any SerialView) {
+  public init(_ name: String, @GrainBuilder value: () -> any GrainView) {
     self.name = name
     self.value = value()
   }
@@ -526,164 +515,164 @@ public struct SerialMember: SerialView {
 }
 
 @resultBuilder
-public enum ValueBuilder {
+public enum GrainBuilder {
   
-  public static func buildExpression(_ expression: NSNull) -> SerialNull {
+  public static func buildExpression(_ expression: NSNull) -> GrainNull {
     .init()
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == NSNull {
-    .init(elements: expression.map { _ in SerialNull() })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == NSNull {
+    .init(elements: expression.map { _ in GrainNull() })
   }
   
-  public static func buildExpression(_ expression: String) -> SerialString {
+  public static func buildExpression(_ expression: String) -> GrainString {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == String {
-    .init(elements: expression.map { SerialString($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == String {
+    .init(elements: expression.map { GrainString($0) })
   }
   
-  public static func buildExpression(_ expression: Bool) -> SerialBoolean {
+  public static func buildExpression(_ expression: Bool) -> GrainBool {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Bool {
-    .init(elements: expression.map { SerialBoolean($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Bool {
+    .init(elements: expression.map { GrainBool($0) })
   }
   
-  public static func buildExpression(_ expression: Int) -> SerialNumber {
+  public static func buildExpression(_ expression: Int) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: Int8) -> SerialNumber {
+  public static func buildExpression(_ expression: Int8) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int8 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int8 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: Int16) -> SerialNumber {
+  public static func buildExpression(_ expression: Int16) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int16 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int16 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: Int32) -> SerialNumber {
+  public static func buildExpression(_ expression: Int32) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int32 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int32 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: Int64) -> SerialNumber {
+  public static func buildExpression(_ expression: Int64) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Int64 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Int64 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: UInt) -> SerialNumber {
+  public static func buildExpression(_ expression: UInt) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: UInt8) -> SerialNumber {
+  public static func buildExpression(_ expression: UInt8) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt8 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt8 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: UInt16) -> SerialNumber {
+  public static func buildExpression(_ expression: UInt16) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt16 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt16 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: UInt32) -> SerialNumber {
+  public static func buildExpression(_ expression: UInt32) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt32 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt32 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: UInt64) -> SerialNumber {
+  public static func buildExpression(_ expression: UInt64) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == UInt64 {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == UInt64 {
+    .init(elements: expression.map { GrainNumber($0) })
   }
 
-  public static func buildExpression(_ expression: Float) -> SerialNumber {
+  public static func buildExpression(_ expression: Float) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Float {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Float {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression(_ expression: Double) -> SerialNumber {
+  public static func buildExpression(_ expression: Double) -> GrainNumber {
     .init(expression)
   }
   
-  public static func buildExpression<S: Sequence>(_ expression: S) -> SerialArray where S.Element == Double {
-    .init(elements: expression.map { SerialNumber($0) })
+  public static func buildExpression<S: Sequence>(_ expression: S) -> GrainArray where S.Element == Double {
+    .init(elements: expression.map { GrainNumber($0) })
   }
   
-  public static func buildExpression<J: SerialView>(_ component: J) -> J {
+  public static func buildExpression<J: GrainView>(_ component: J) -> J {
     component
   }
   
-  public static func buildExpression<J: SerialView>(_ component: [J]) -> SerialArray {
+  public static func buildExpression<J: GrainView>(_ component: [J]) -> GrainArray {
     .init(elements: component)
   }
   
-  public static func buildArray<T: SerialView>(_ components: [T]) -> [T] {
+  public static func buildArray<T: GrainView>(_ components: [T]) -> [T] {
     return components
   }
   
-  public static func buildOptional<T: SerialView>(_ component: T?) -> any SerialView {
+  public static func buildOptional<T: GrainView>(_ component: T?) -> any GrainView {
     guard let component else {
-      return SerialNull()
+      return GrainNull()
     }
     return component
   }
   
-  public static func buildEither<T: SerialView>(first component: T) -> T {
+  public static func buildEither<T: GrainView>(first component: T) -> T {
     component
   }
   
-  public static func buildEither<T: SerialView>(second component: T) -> T {
+  public static func buildEither<T: GrainView>(second component: T) -> T {
     component
   }
   
-  public static func buildLimitedAvailability<T: SerialView>(_ component: T) -> T {
+  public static func buildLimitedAvailability<T: GrainView>(_ component: T) -> T {
     component
   }
   
-  public static func buildBlock() -> SerialEmtpy {
+  public static func buildBlock() -> GrainEmpty {
     .init()
   }
   
-  public static func buildBlock<J: SerialView>(_ component: J) -> J {
+  public static func buildBlock<J: GrainView>(_ component: J) -> J {
     component
   }
   
