@@ -3,6 +3,42 @@ import Foundation
 import TSCBasic
 import TSCUtility
 
+enum Log {
+  
+  static func debug(
+    file: StaticString = #file,
+    line: UInt = #line,
+    _ log: OSLog,
+    _ object: @autoclosure () -> Any
+  ) {
+    os_log(.default, log: log, "%{public}@\n%{public}@:%{public}@", "\(object())", "\(file)", "\(line.description)")
+  }
+  
+  static func error(
+    file: StaticString = #file,
+    line: UInt = #line,
+    _ log: OSLog,
+    _ object: @autoclosure () -> Any
+  ) {
+    os_log(.info, log: log, "%{public}@\n%{public}@:%{public}@", "\(object())", "\(file)", "\(line.description)")
+  }
+  
+}
+
+extension OSLog {
+  
+  @inline(__always)
+  private static func makeOSLogInDebug(isEnabled: Bool = true, _ factory: () -> OSLog) -> OSLog {
+#if DEBUG
+    return factory()
+#else
+    return .disabled
+#endif
+  }
+  
+  static let generic: OSLog = makeOSLogInDebug { OSLog.init(subsystem: "app.muukii", category: "generic") }
+}
+
 struct CLIError: Swift.Error, LocalizedError, Equatable {
 
   var errorDescription: String?
@@ -68,9 +104,10 @@ struct CLI: AsyncParsableCommand {
           return runtimeFrameworksPath.appending(component: "libSerialDSL.dylib")
         }
       }
+      
+      Log.debug(.generic, "\(runtimeFrameworksPath)")
 
       guard localFileSystem.exists(libraryPath) else {
-//        print(CommandLine.arguments[0], try? AbsolutePath(validating: CommandLine.arguments[0]).parentDirectory, Bundle.main.executablePath)
         throw CLIError.runtimeNotFound
       }
 
