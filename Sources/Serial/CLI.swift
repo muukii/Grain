@@ -48,17 +48,33 @@ struct CLI: AsyncParsableCommand {
 
       let applicationPath = try Utils.hostBinDir(fileSystem: localFileSystem)
 
-      let runtimeFrameworksPath = applicationPath.appending(
-        components: "PackageFrameworks",
-        "SerialDSL.framework"
-      )
+      var runtimeFrameworksPath: AbsolutePath {
+                
+        if localFileSystem.exists(applicationPath.appending(component: "libSerialDSL.dylib")) {
+          return applicationPath
+        }
+        
+        return applicationPath.appending(
+          components: "PackageFrameworks",
+          "SerialDSL.framework"
+        )
+      }
+      
+      var libraryPath: AbsolutePath {
+        if runtimeFrameworksPath.extension == "framework" {
+          return runtimeFrameworksPath.appending(component: "SerialDSL")
+        } else {
+          // note: this is not correct for all platforms, but we only actually use it on macOS.
+          return runtimeFrameworksPath.appending(component: "libSerialDSL.dylib")
+        }
+      }
 
       guard localFileSystem.exists(runtimeFrameworksPath) else {
         throw CLIError.runtimeNotFound
       }
 
       let target = try Utils.computeMinimumDeploymentTarget(
-        of: runtimeFrameworksPath.appending(component: "SerialDSL")
+        of: libraryPath
       )
 
       let sdkPath = try Utils.sdk()
