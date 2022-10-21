@@ -1,4 +1,4 @@
-# SerialDSL
+# Grain
 
 A DSL for representing serialized data structure (like JSON).
 
