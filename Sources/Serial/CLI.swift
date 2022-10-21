@@ -333,8 +333,9 @@ enum Utils {
 
   static func hostBinDir(
     fileSystem: FileSystem
-  ) throws -> AbsolutePath {    
-    try AbsolutePath(validating: Bundle.main.executablePath!).parentDirectory
+  ) throws -> AbsolutePath {
+                 
+    return try AbsolutePath(validating: (Bundle.main.executablePath! as NSString).resolvingSymlinksInPath).parentDirectory
   }
 }
 
