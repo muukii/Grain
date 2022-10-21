@@ -16,7 +16,7 @@ let package = Package(
       type: .dynamic,
       targets: ["SerialDSL"]
     ),
-    .executable(name: "Serial", targets: ["Serial"])
+    .executable(name: "Serial", targets: ["Serial", "SerialDSL"])
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.0"),
