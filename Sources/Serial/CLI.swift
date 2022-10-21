@@ -70,7 +70,7 @@ struct CLI: AsyncParsableCommand {
       }
 
       guard localFileSystem.exists(libraryPath) else {
-        print(CommandLine.arguments[0], try? AbsolutePath(validating: CommandLine.arguments[0]).parentDirectory, Bundle.main.executablePath)
+//        print(CommandLine.arguments[0], try? AbsolutePath(validating: CommandLine.arguments[0]).parentDirectory, Bundle.main.executablePath)
         throw CLIError.runtimeNotFound
       }
 
@@ -292,14 +292,19 @@ enum Utils {
   }
 
   static func hostBinDir(
-    fileSystem: FileSystem,
-    originalWorkingDirectory: AbsolutePath? = nil
+    fileSystem: FileSystem
   ) throws -> AbsolutePath {
-    let originalWorkingDirectory = originalWorkingDirectory ?? fileSystem.currentWorkingDirectory
-    guard let cwd = originalWorkingDirectory else {
-      return try AbsolutePath(validating: CommandLine.arguments[0]).parentDirectory
+    let cwd = fileSystem.currentWorkingDirectory!
+//    guard let cwd = originalWorkingDirectory else {
+//      return try AbsolutePath(validating: CommandLine.arguments[0]).parentDirectory
+//    }
+    let path = AbsolutePath(CommandLine.arguments[0], relativeTo: cwd).parentDirectory
+    
+    if fileSystem.exists(path) {
+      return path
+    } else {
+      return try AbsolutePath(validating: Bundle.main.executablePath!).parentDirectory
     }
-    return AbsolutePath(CommandLine.arguments[0], relativeTo: cwd).parentDirectory
   }
 }
 
