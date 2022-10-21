@@ -1,6 +1,6 @@
 # Grain
 
-A data serialization template language.
+A data serialization template language in Swift
 
 Describing data in Swift using DSL in `.swift` file then the command line application renders it into any format like JSON.
 
