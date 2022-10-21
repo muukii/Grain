@@ -61,6 +61,8 @@ serialize {
 
 ```
 
+`serialize` function declares what renders into data.
+
 Renders Data.swift as JSON in Terminal
 ```sh
 $ grain Data.swift
