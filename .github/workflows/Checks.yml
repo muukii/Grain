@@ -5,16 +5,38 @@ on:
     branches: "**"
 
 jobs:
-  build:
+  swiftpm-build:
+    runs-on: macos-12    
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1.1
+        with:
+          xcode-version: "14.0"
+      - uses: actions/checkout@v2
+      - name: Swift Package
+        run: swift build
+        
+  xcode-build:
     runs-on: macos-12
-    
     steps:
       - uses: maxim-lobanov/setup-xcode@v1.1
         with:
           xcode-version: "14.0"
       - uses: actions/checkout@v2
       - name: xcodebuild
-        run: xcodebuild -scheme SerialDSL -sdk iphoneos -destination 'generic/platform=iOS' | xcpretty
+        run: xcodebuild -scheme Grain -sdk iphoneos -destination 'generic/platform=macos' | xcpretty
+
+  test-render:
+    runs-on: macos-12
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1.1
+        with:
+          xcode-version: "14.0"
+      - uses: actions/checkout@v2
+      - name: Install mint
+        run: brew install mint
+      - name: Run
+        run: grain
+      
   test:
     runs-on: macos-12
 
@@ -26,7 +48,7 @@ jobs:
         with:
           submodules: true
       - name: Test
-        run: xcodebuild -scheme SerialDSLTests -resultBundlePath results/SerialDSL.xcresult test -destination 'platform=iOS Simulator,name=iPhone 8,OS=16.0' -derivedDataPath ./DerivedData | xcpretty
+        run: xcodebuild -scheme GrainDescriptorTests -resultBundlePath results/SerialDSL.xcresult test -destination 'platform=iOS Simulator,name=iPhone 8,OS=16.0' -derivedDataPath ./DerivedData | xcpretty
 
       - uses: kishikawakatsumi/xcresulttool@v1
         with:
