@@ -120,7 +120,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
 
       cmd += [filePath.pathString]
       cmd += [
-        "-Xfrontend", "-disable-implicit-concurrency-module-import",
+//        "-Xfrontend", "-disable-implicit-concurrency-module-import",
         "-Xfrontend", "-disable-implicit-string-processing-module-import",
         "-I", applicationPath.pathString,
       ]
