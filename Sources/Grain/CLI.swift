@@ -3,7 +3,7 @@ import Foundation
 import TSCBasic
 import TSCUtility
 
-let RUNTIME_NAME = "SerialDSL"
+let RUNTIME_NAME = "GrainDescriptor"
 
 enum Log {
   

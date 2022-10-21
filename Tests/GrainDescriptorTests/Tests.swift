@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import SerialDSL
+@testable import GrainDescriptor
 
 final class JSONDSLTests: XCTestCase {
 

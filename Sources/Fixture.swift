@@ -1,4 +1,4 @@
-import SerialDSL
+import GrainDescriptor
 import Foundation
 
 struct Record: SerialView {
