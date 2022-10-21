@@ -24,7 +24,7 @@ jobs:
       - name: Generate
         run: |
           $(xcrun --find docc) process-archive \
-            transform-for-static-hosting ".build/Build/Products/Debug-iphoneos/GrainDescriptor.doccarchive" \
+            transform-for-static-hosting ".build/Build/Products/Debug/GrainDescriptor.doccarchive" \
             --output-path public \
             --hosting-base-path "Grain"
       - name: Deploy
