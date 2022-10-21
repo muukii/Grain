@@ -3,6 +3,8 @@ import Foundation
 import TSCBasic
 import TSCUtility
 
+let RUNTIME_NAME = "SerialDSL"
+
 enum Log {
   
   static func debug(
@@ -86,22 +88,22 @@ struct CLI: AsyncParsableCommand {
 
       var runtimeFrameworksPath: AbsolutePath {
                 
-        if localFileSystem.exists(applicationPath.appending(component: "libSerialDSL.dylib")) {
+        if localFileSystem.exists(applicationPath.appending(component: "lib\(RUNTIME_NAME).dylib")) {
           return applicationPath
         }
         
         return applicationPath.appending(
           components: "PackageFrameworks",
-          "SerialDSL.framework"
+          "\(RUNTIME_NAME).framework"
         )
       }
       
       var libraryPath: AbsolutePath {
         if runtimeFrameworksPath.extension == "framework" {
-          return runtimeFrameworksPath.appending(component: "SerialDSL")
+          return runtimeFrameworksPath.appending(component: RUNTIME_NAME)
         } else {
           // note: this is not correct for all platforms, but we only actually use it on macOS.
-          return runtimeFrameworksPath.appending(component: "libSerialDSL.dylib")
+          return runtimeFrameworksPath.appending(component: "lib\(RUNTIME_NAME).dylib")
         }
       }
       
@@ -122,11 +124,19 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
 
       var cmd: [String] = []
       cmd += [swiftc.pathString]
-      cmd += [
-        "-F", runtimeFrameworksPath.parentDirectory.pathString,
-        "-framework", "SerialDSL",
-        "-Xlinker", "-rpath", "-Xlinker", runtimeFrameworksPath.parentDirectory.pathString,
-      ]
+      
+      if runtimeFrameworksPath.extension == "framework" {
+        cmd += [
+          "-F", runtimeFrameworksPath.parentDirectory.pathString,
+          "-framework", RUNTIME_NAME,
+          "-Xlinker", "-rpath", "-Xlinker", runtimeFrameworksPath.parentDirectory.pathString,
+        ]
+      } else {
+        cmd += [
+          "-L", runtimeFrameworksPath.pathString,
+          "-l\(RUNTIME_NAME)",
+        ]
+      }
       cmd += ["-target", "arm64-apple-macosx\(target!.versionString)"]
 
       cmd += ["-sdk", sdkPath.pathString]

@@ -30,7 +30,7 @@ let package = Package(
       name: "SerialDSL",
       dependencies: [],
       swiftSettings: [
-//        .unsafeFlags(["-enable-library-evolution"])
+        .unsafeFlags(["-enable-library-evolution"])
       ]
     ),
     .executableTarget(
