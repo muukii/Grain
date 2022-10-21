@@ -155,10 +155,10 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
             loggingHandler: { log in }
           )
           
-          Log.debug(.generic, "\(result) \(cmd.joined(separator: " "))")
-          
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
+            let output = try result.utf8stderrOutput()
+            Log.debug(.generic, "\(output)\n\(cmd.joined(separator: " "))")
             throw DomainError.failedToCompile
           }
           
