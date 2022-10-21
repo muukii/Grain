@@ -135,6 +135,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         cmd += [
           "-L", runtimeFrameworksPath.pathString,
           "-l\(RUNTIME_NAME)",
+          "-Xlinker", "-rpath", "-Xlinker", runtimeFrameworksPath.pathString
         ]
       }
       cmd += ["-target", "arm64-apple-macosx\(target!.versionString)"]
