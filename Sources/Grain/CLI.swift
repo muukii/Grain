@@ -42,6 +42,7 @@ struct CLI: AsyncParsableCommand {
     }
 
     @Argument var targetFilePath: String
+    @Flag var verbose = false
 
     mutating func run() async throws {
 
@@ -124,6 +125,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         "-Xfrontend", "-disable-implicit-string-processing-module-import",
         "-I", applicationPath.pathString,
       ]
+      cmd += ["-swift-version", "5"]
 
       try await withTemporaryDirectory { workingPath in
         
@@ -133,6 +135,8 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         do {
           
           cmd += ["-o", compiledFile.pathString]
+          
+          Log.debug("Make executable binary\n\(cmd.joined(separator: "\\\n"))")
           
           // compile
           let result = try await TSCBasic.Process.popen(

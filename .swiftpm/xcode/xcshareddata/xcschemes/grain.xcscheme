@@ -78,7 +78,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "./Sources/Fixture.swift"
+            argument = "./Sources/Fixture.swift --verbose"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

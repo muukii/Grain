@@ -11,7 +11,5 @@ fi
 
 swift build $SWIFT_BUILD_FLAGS 
 mkdir -p ${PREFIX}/bin/grain-build
-cp -f ${BUILD_DIR}/grain ${PREFIX}/bin/grain-build/
-cp -f ${BUILD_DIR}/libSwiftToolsSupport.dylib ${PREFIX}/bin/grain-build/
-cp -f ${BUILD_DIR}/libGrainDescriptor.dylib ${PREFIX}/bin/grain-build/
+cp -r -f ${BUILD_DIR}/ ${PREFIX}/bin/grain-build/
 ln -f -s ${PREFIX}/bin/grain-build/grain ${PREFIX}/bin/grain
