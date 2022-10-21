@@ -20,13 +20,13 @@ jobs:
           submodules: true  # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
       - name: Build
-        run: xcodebuild docbuild -scheme SerialDSL -derivedDataPath .build -destination 'generic/platform=iOS'
+        run: xcodebuild docbuild -scheme GrainDescriptor -derivedDataPath .build -destination 'platform=macos'
       - name: Generate
         run: |
           $(xcrun --find docc) process-archive \
-            transform-for-static-hosting ".build/Build/Products/Debug-iphoneos/SerialDSL.doccarchive" \
+            transform-for-static-hosting ".build/Build/Products/Debug-iphoneos/GrainDescriptor.doccarchive" \
             --output-path public \
-            --hosting-base-path "swift-SerialDSL"
+            --hosting-base-path "Grain"
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
