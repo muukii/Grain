@@ -4,6 +4,21 @@ A data serialization template language in Swift
 
 Describing data in Swift using DSL in `.swift` file then the command line application renders it into any format like JSON.
 
+## Motivation
+
+In writing JSON or something else like that, we may be exhausted in describing repeatedly.  
+We often think somehow it could be done effectively like a programming language.  
+[jsonnet](https://jsonnet.org/) is one of the preprocessors solving that.  
+Grain aims to achieve such a function in Swift language.
+
+Create a swift file, then write data, and render it by using Grain tools.
+
+The advantages of using Swift are:
+- writing data and data structure like thinking in SwiftUI
+- type checking by Swift compiler
+- validating the data
+
+
 ## Naming
 
 serialization -> cereal -> grain
