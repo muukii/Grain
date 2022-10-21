@@ -148,11 +148,14 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
           
           cmd += ["-o", compiledFile.pathString]
           
+          // compile
           let result = try await TSCBasic.Process.popen(
             arguments: cmd,
             environment: ProcessInfo.processInfo.environment,
             loggingHandler: { log in }
           )
+          
+          Log.debug(.generic, "\(result) \(cmd.joined(separator: " "))")
           
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
