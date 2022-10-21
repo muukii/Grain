@@ -1,6 +1,18 @@
 # Grain
 
-A DSL for representing serialized data structure (like JSON).
+A data serialization template language.
+
+## Naming
+
+serialization -> cereal -> grain
+
+## Installation
+
+From [mint 🌱](https://github.com/yonaskolb/Mint)
+
+```
+mint install muukii/Grain
+```
 
 ## Overview
 
