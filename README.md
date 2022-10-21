@@ -34,15 +34,32 @@ serialize {
     GrainMember("value") {
       1
     }
+    
+    for i in 0..<10 {
+      GrainMember("key_\(i)") {
+        i
+      }
+    }
   }
   
 }
+
 ```
 
 Renders Data.swift as JSON in Terminal
 ```sh
 $ grain Data.swift
 {
+  "key_0" : 0,
+  "key_1" : 1,
+  "key_2" : 2,
+  "key_3" : 3,
+  "key_4" : 4,
+  "key_5" : 5,
+  "key_6" : 6,
+  "key_7" : 7,
+  "key_8" : 8,
+  "key_9" : 9,
   "value" : 1
 }
 ```
