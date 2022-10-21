@@ -23,7 +23,7 @@ jobs:
           xcode-version: "14.0"
       - uses: actions/checkout@v2
       - name: xcodebuild
-        run: xcodebuild -scheme Grain -sdk iphoneos -destination 'generic/platform=macos' | xcpretty
+        run: xcodebuild -scheme grain -sdk macosx -destination 'generic/platform=macos' | xcpretty
 
   test-render:
     runs-on: macos-12
