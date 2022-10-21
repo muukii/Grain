@@ -62,7 +62,7 @@ struct CLI: AsyncParsableCommand {
       
       static var failedToCompile: Self = .init(errorDescription: "Failed to compile")
       static var couldNotCreateOutputFile: Self = .init(errorDescription: "Could not create output file")
-      static var failureInMakingOutput: Self = .init(errorDescription: "Failure iin makiing output")
+      static var failureInMakingOutput: Self = .init(errorDescription: "Failure in makiing output")
       
     }
 
@@ -195,6 +195,10 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
           
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
+            
+            let output = try result.utf8stderrOutput()
+            Log.debug(.generic, "\(output)\n\(cmd.joined(separator: " "))")
+            
             throw DomainError.failureInMakingOutput
           }
           
