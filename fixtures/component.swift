@@ -1,5 +1,19 @@
 import GrainDescriptor
-import Foundation
+
+serialize {
+  
+  GrainObject {
+    GrainMember("data") {
+      Results(records: [
+        .init(name: "A", age: 1),
+        .init(name: "B", age: 2),
+      ])      
+    }
+  }
+  
+}
+
+// MARK: - Components
 
 struct Record: GrainView {
   
@@ -28,21 +42,6 @@ struct Results: GrainView {
       GrainMember("results") {
         records
       }
-    }
-  }
-  
-}
-
-let results = Results(records: [
-  .init(name: "A", age: 1),
-  .init(name: "B", age: 2),
-])
-
-serialize {
-  
-  GrainObject {
-    GrainMember("data") {
-      results
     }
   }
   

@@ -17,6 +17,24 @@
       "args": [],
       "cwd": "${workspaceFolder:swift-Serial-DSL}",
       "preLaunchTask": "swift: Build Release Serial"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug grain",
+      "program": "${workspaceFolder:Grain}/.build/debug/grain",
+      "args": [],
+      "cwd": "${workspaceFolder:Grain}",
+      "preLaunchTask": "swift: Build Debug grain"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release grain",
+      "program": "${workspaceFolder:Grain}/.build/release/grain",
+      "args": [],
+      "cwd": "${workspaceFolder:Grain}",
+      "preLaunchTask": "swift: Build Release grain"
     }
   ]
 }
