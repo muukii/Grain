@@ -121,8 +121,9 @@ $ grain Component.swift
 
 ## Showcases
 
-### OpenAPI Specification
-
+<details>
+    <summary>OpenAPI Specification</summary>
+ 
 ```swift
 import GrainDescriptor
 
@@ -194,3 +195,7 @@ $ grain endpoints.swift
   }
 }
 ```
+
+</details>
+
+
