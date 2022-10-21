@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Serial",
+      "program": "${workspaceFolder:swift-Serial-DSL}/.build/debug/Serial",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-Serial-DSL}",
+      "preLaunchTask": "swift: Build Debug Serial"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release Serial",
+      "program": "${workspaceFolder:swift-Serial-DSL}/.build/release/Serial",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-Serial-DSL}",
+      "preLaunchTask": "swift: Build Release Serial"
+    }
+  ]
+}
