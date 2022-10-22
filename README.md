@@ -51,6 +51,17 @@ other installation ways will be added in the future
 $ grain <File>
 ```
 
+```
+$ grain <File 1> <File 2> ...
+```
+
+```
+$ grain <File 1> <File 2> ... --output /path/to/output/
+```
+
+It writes results into given path using same name.  
+`Schema.swift` -> `Schema.json`
+
 ### Example - writing inline
 
 Creates Data.swift describing data
@@ -75,8 +86,6 @@ serialize {
 
 ```
 
-`serialize` function declares what renders into data.
-
 Renders Data.swift as JSON in Terminal
 ```sh
 $ grain Data.swift
@@ -94,6 +103,9 @@ $ grain Data.swift
   "value" : 1
 }
 ```
+
+`serialize` function declares what renders into data.  
+It also has implicit parameters to customize how to encode and how to save as files.
 
 ### Example - creating component and composing them to describe data efficiently
 
