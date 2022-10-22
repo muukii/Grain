@@ -62,9 +62,12 @@ $ grain <File 1> <File 2> ... --output /path/to/output/
 It writes results into given path using same name.  
 `Schema.swift` -> `Schema.json`
 
-### Example - writing inline
+## Instructions
+
+### A basic case
 
 Creates Data.swift describing data
+
 ```swift
 import GrainDescriptor
 
@@ -104,10 +107,51 @@ $ grain Data.swift
 }
 ```
 
+### `serialize` function is the way to create output
+
 `serialize` function declares what renders into data.  
 It also has implicit parameters to customize how to encode and how to save as files.
 
-### Example - creating component and composing them to describe data efficiently
+```swift
+serialize {
+  // describe what you serialize
+}
+```
+
+output parameter accepts how result should be output.
+
+```swift
+serialize(output: .stdout) { ... }
+```
+
+prints out into stdout
+
+```swift
+serialize(output: .file) { ... }
+```
+
+write into file in the same directory of source, or specified output directory (using `--output` option)
+
+```swift
+serialize(output: .file(.named("<file_name>")) { ... }
+```
+
+writing file as well as above but uses different name by given name.
+
+It allows us to define multiple times.  
+This makes files using given name.
+
+```swift
+serialize(output: .file(.named("pattern-1"))) {
+  
+}
+
+serialize(output: .file(.named("pattern-2"))) {
+  
+}
+```
+
+### Creating component and composing them to describe data efficiently
 
 In Component.swift
 ```swift
