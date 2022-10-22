@@ -45,6 +45,27 @@ public struct Serialization {
     
 }
 
+public struct Context: Codable {
+  
+  public let filePath: String
+  
+  public init(filePath: String) {
+    self.filePath = filePath
+  }
+  
+  public func json() -> String {
+    let e = JSONEncoder()
+    let d = try! e.encode(self)
+    return String(data: d, encoding: .utf8)!
+  }
+    
+  public static func decode(_ data: Data) -> Self {
+    let d = JSONDecoder()
+    let r = try! d.decode(Self.self, from: data)
+    return r
+  }
+}
+
 public struct Header: Codable {
   public let outputConfiguration: OutputConfiguration
   
@@ -72,6 +93,7 @@ public struct OutputConfiguration: Codable {
 }
 
 public func serialize(
+  name: String? = nil,
   serialization: Serialization = .json,
   outputConfiguration: OutputConfiguration = .init(fileExtension: "json"),
   @GrainBuilder _ thunk: () throws -> some GrainView
@@ -115,3 +137,12 @@ public func serialize(
     print("❌ Serialization failed:", error)
   }
 }
+
+public let context: Context = {
+  if let optIdx = CommandLine.arguments.firstIndex(of: "-context") {
+    let encodedContext = CommandLine.arguments[optIdx + 1]
+    return Context.decode(encodedContext.data(using: .utf8)!)
+  } else {
+    fatalError("Grain context was not provided")
+  }
+}()
