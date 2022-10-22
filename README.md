@@ -35,7 +35,12 @@ serialization -> cereal -> grain
 From [mint 🌱](https://github.com/yonaskolb/Mint)
 
 ```
-mint install muukii/Grain
+$ mint install muukii/Grain
+```
+
+From make
+```
+$ make install
 ```
 
 other installation ways will be added in the future
