@@ -244,6 +244,10 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
 
           cmd += ["-fileno-output", "\(fileno(outputFileDesc))"]
           cmd += ["-fileno-header", "\(fileno(outputHeaderFileDesc))"]
+          
+          let context = GrainDescriptor.Context(filePath: targetFilePath.pathString)
+          
+          cmd += ["-context", context.json()]
 
           let result = try await TSCBasic.Process.popen(
             arguments: cmd,
