@@ -54,23 +54,29 @@ struct CLI: AsyncParsableCommand {
         throw CLIError.fileNotFound
       }
 
-      let foundPath = try TSCBasic.Process.checkNonZeroExit(arguments: [
-        "/usr/bin/xcrun", "--find", "swiftc",
-      ]).spm_chomp()
+      let swiftCompilerPath = try AbsolutePath(
+        validating: try TSCBasic.Process.checkNonZeroExit(
+          arguments: [
+            "/usr/bin/xcrun", "--find", "swiftc",
+          ]
+        )
+        .spm_chomp()
+      )
+            
+      let triple = Triple.getHostTriple(usingSwiftCompiler: swiftCompilerPath)
       
-      let swiftc = try AbsolutePath(validating: foundPath)
-      
-      let triple = Triple.getHostTriple(usingSwiftCompiler: swiftc)
-      
-      let applicationPath = try Utils.hostBinDir(fileSystem: localFileSystem)
+      /// a directory path of this process binary
+      let applicationDirPath = try Utils.hostBinDir(fileSystem: localFileSystem)
 
       var runtimeFrameworksPath: AbsolutePath {
                 
-        if localFileSystem.exists(applicationPath.appending(component: "lib\(RUNTIME_NAME).dylib")) {
-          return applicationPath
+        if localFileSystem.exists(applicationDirPath.appending(component: "lib\(RUNTIME_NAME).dylib")) {
+          // a case of releasing
+          return applicationDirPath
         }
         
-        return applicationPath.appending(
+        // in development 
+        return applicationDirPath.appending(
           components: "PackageFrameworks",
           "\(RUNTIME_NAME).framework"
         )
@@ -86,7 +92,7 @@ struct CLI: AsyncParsableCommand {
       }
       
       Log.debug("""
-applicationPath: \(applicationPath)
+applicationPath: \(applicationDirPath)
 runtimeFrameworksPath: \(runtimeFrameworksPath)
 """)
 
@@ -101,7 +107,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
       let sdkPath = try Utils.sdk()
 
       var cmd: [String] = []
-      cmd += [swiftc.pathString]
+      cmd += [swiftCompilerPath.pathString]
       
       if runtimeFrameworksPath.extension == "framework" {
         cmd += [
@@ -126,7 +132,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
       cmd += [
 //        "-Xfrontend", "-disable-implicit-concurrency-module-import",
         "-Xfrontend", "-disable-implicit-string-processing-module-import",
-        "-I", applicationPath.pathString,
+        "-I", applicationDirPath.pathString,
       ]
       cmd += ["-swift-version", "5"]
 
