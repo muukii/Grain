@@ -48,7 +48,7 @@ other installation ways will be added in the future
 ## Overview
 
 ```sh
-$ grain <File>
+$ grain <template file>
 ```
 
 ```
@@ -220,6 +220,28 @@ $ grain Component.swift
       }
     ]
   }
+}
+```
+
+### Use async/await
+
+the template file allows writing async/await operation.    
+`GrainDescriptor` is including `Alamofire` as built-in.  
+For instance, we could create a serizalized data using networking like fetching data.
+
+```swift
+import GrainDescriptor
+
+let response = try await AF.request("https://httpbin.org/get").serializingString().value
+
+serialize {
+  
+  GrainObject {  
+    GrainMember("result") {
+      response
+    }
+  }
+  
 }
 ```
 
