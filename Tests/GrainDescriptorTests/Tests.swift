@@ -1,24 +1,28 @@
 import XCTest
 
-@testable import GrainDescriptor
+import GrainDescriptor
+
+let encoder: JSONEncoder = {
+  let e = JSONEncoder()
+  e.outputFormatting = .prettyPrinted
+  return e
+}()
+
+func toString(_ j: some GrainView) -> String {
+  let data = try! encoder.encode(j)
+  return String(data: data, encoding: .utf8)!
+}
+
+func compare(
+  _ j: some GrainView,
+  _ expects: String,
+  file: StaticString = #filePath,
+  line: UInt = #line
+) {
+  XCTAssertEqual(toString(j), expects, file: file, line: line)
+}
 
 final class JSONDSLTests: XCTestCase {
-
-  let encoder = JSONEncoder()
-
-  func toString(_ j: some GrainView) -> String {
-    let data = try! encoder.encode(j)
-    return String(data: data, encoding: .utf8)!
-  }
-
-  func compare(
-    _ j: some GrainView,
-    _ expects: String,
-    file: StaticString = #filePath,
-    line: UInt = #line
-  ) {
-    XCTAssertEqual(toString(j), expects, file: file, line: line)
-  }
 
   override func setUp() {
     encoder.outputFormatting = .prettyPrinted
