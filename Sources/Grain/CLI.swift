@@ -32,8 +32,6 @@ struct CLI: AsyncParsableCommand {
 
   struct Render: AsyncParsableCommand {
     
-<<<<<<< Updated upstream
-=======
     struct RenderResult {
       let outputData: Data
       let headerData: Data
@@ -48,7 +46,6 @@ struct CLI: AsyncParsableCommand {
       
     }
 
->>>>>>> Stashed changes
     struct DomainError: Swift.Error, LocalizedError, Equatable {
       
       var errorDescription: String?
@@ -59,18 +56,12 @@ struct CLI: AsyncParsableCommand {
       
     }
 
-    @Argument var targetFilePath: String
+    @Argument var targetFilePaths: [String]
+    @Option(name: .customLong("output")) var outputDirectory: String?
     @Flag var verbose = false
 
-    mutating func run() async throws {
+    func run() async throws {
 
-<<<<<<< Updated upstream
-      let filePath = localFileSystem.currentWorkingDirectory!.appending(
-        RelativePath(targetFilePath)
-      )
-
-      guard localFileSystem.exists(filePath) else {
-=======
       let validatedPaths = targetFilePaths.map {
         AbsolutePath($0, relativeTo: localFileSystem.currentWorkingDirectory!)
       }
@@ -121,7 +112,6 @@ struct CLI: AsyncParsableCommand {
     private func render(_ targetFilePath: AbsolutePath) async throws -> RenderResult {
 
       guard localFileSystem.exists(targetFilePath) else {
->>>>>>> Stashed changes
         throw CLIError.fileNotFound
       }
 
@@ -199,7 +189,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
       cmd += ["-sdk", sdkPath.pathString]
       cmd += Utils.flags()
 
-      cmd += [filePath.pathString]
+      cmd += [targetFilePath.pathString]
       cmd += [
 //        "-Xfrontend", "-disable-implicit-concurrency-module-import",
         "-Xfrontend", "-disable-implicit-string-processing-module-import",
@@ -207,13 +197,8 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
       ]
       cmd += ["-swift-version", "5"]
 
-<<<<<<< Updated upstream
-      try await withTemporaryDirectory { workingPath in
-        
-=======
       return try await withTemporaryDirectory { workingPath -> RenderResult in
 
->>>>>>> Stashed changes
         let compiledFile = workingPath.appending(component: "compiled")
         
         // make a binary
@@ -243,35 +228,19 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         do {
           
           let outputFile = workingPath.appending(component: "output")
-<<<<<<< Updated upstream
-          
-=======
           let outputHeaderFile = workingPath.appending(component: "output_header")
 
->>>>>>> Stashed changes
           guard let outputFileDesc = fopen(outputFile.pathString, "w") else {
             throw DomainError.couldNotCreateOutputFile
           }
           
-<<<<<<< Updated upstream
-=======
           guard let outputHeaderFileDesc = fopen(outputHeaderFile.pathString, "w") else {
             throw DomainError.couldNotCreateOutputFile
           }
 
->>>>>>> Stashed changes
           var cmd: [String] = []
           
           cmd += [compiledFile.pathString]
-<<<<<<< Updated upstream
-          
-          cmd += ["-fileno", "\(fileno(outputFileDesc))"]
-          
-          let result = try await TSCBasic.Process.popen(arguments: cmd, environment: ProcessInfo.processInfo.environment, loggingHandler: { log in })
-                    
-          fclose(outputFileDesc)
-          
-=======
 
           cmd += ["-fileno-output", "\(fileno(outputFileDesc))"]
           cmd += ["-fileno-header", "\(fileno(outputHeaderFileDesc))"]
@@ -285,7 +254,6 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
           fclose(outputFileDesc)
           fclose(outputHeaderFileDesc)
 
->>>>>>> Stashed changes
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
             
@@ -294,20 +262,12 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
             
             throw DomainError.failureInMakingOutput
           }
-<<<<<<< Updated upstream
-          
-          let output: String = try localFileSystem.readFileContents(outputFile)
-          
-          print(output)
-          
-=======
 
           let output: Data = try localFileSystem.readFileContents(outputFile)
           let outputHeader: Data = try localFileSystem.readFileContents(outputHeaderFile)
 
           return .init(outputData: output, headerData: outputHeader)
 
->>>>>>> Stashed changes
         }
         
       }
@@ -317,7 +277,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
 
 }
 
-func withTemporaryDirectory(_ work: @escaping (AbsolutePath) async throws -> Void) async throws {
+func withTemporaryDirectory<R>(_ work: @escaping (AbsolutePath) async throws -> R) async throws -> R {
   
   try await withCheckedThrowingContinuation { continuation in
     
@@ -325,9 +285,9 @@ func withTemporaryDirectory(_ work: @escaping (AbsolutePath) async throws -> Voi
       try withTemporaryDirectory { path, completion -> Void in
         Task {
           do {
-            try await work(path)
+            let r = try await work(path)
             completion(path)
-            continuation.resume()
+            continuation.resume(returning: r)
           } catch {
             print(error)
             // handle error
