@@ -14,6 +14,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "GrainDescriptor"
+               BuildableName = "GrainDescriptor"
+               BlueprintName = "GrainDescriptor"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "grain"
                BuildableName = "grain"
                BlueprintName = "grain"
@@ -78,7 +92,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "./Sources/Fixture.swift ./fixtures/openapi.swift --verbose "
+            argument = "./Sources/Fixture.swift ./fixtures/openapi.swift --output /Users/muukii/Desktop"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

@@ -25,10 +25,11 @@ let package = Package(
     .target(
       name: "GrainDescriptor",
       dependencies: [
-        "Alamofire"
+        "Alamofire",
+        .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
       ],
       swiftSettings: [
-        .unsafeFlags(["-enable-library-evolution"])
+//        .unsafeFlags(["-enable-library-evolution"])
       ]
     ),
     .executableTarget(
@@ -36,7 +37,7 @@ let package = Package(
       dependencies: [
         "GrainDescriptor",
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "SwiftToolsSupport", package: "swift-tools-support-core"),
+        .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
       ]
     ),
     .testTarget(
