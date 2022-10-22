@@ -17,7 +17,7 @@ serialize {
       response
     }
     GrainMember("context") {
-      context.filePath
+      context.filePath.pathString
     }
   }
   

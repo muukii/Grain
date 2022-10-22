@@ -32,20 +32,6 @@ struct CLI: AsyncParsableCommand {
 
   struct Render: AsyncParsableCommand {
     
-    struct RenderResult {
-      let outputData: Data
-      let headerData: Data
-      
-      func header() -> GrainDescriptor.Header {
-        .decode(headerData)
-      }
-      
-      func outputString() -> String {
-        String(data: outputData, encoding: .utf8)!
-      }
-      
-    }
-
     struct DomainError: Swift.Error, LocalizedError, Equatable {
       
       var errorDescription: String?
@@ -66,50 +52,24 @@ struct CLI: AsyncParsableCommand {
         AbsolutePath($0, relativeTo: localFileSystem.currentWorkingDirectory!)
       }
             
-      let results = try await withThrowingTaskGroup(of: (AbsolutePath, RenderResult).self) { group in
+      await withThrowingTaskGroup(of: Void.self) { group in
         
         for path in validatedPaths {
           group.addTask {
-            let result = try await self.render(path)
-            return (path, result)
+                        
+            let context = GrainDescriptor.Context(
+              filePath: path,
+              outputDir: outputDirectory.map { AbsolutePath($0, relativeTo: localFileSystem.currentWorkingDirectory!) }
+            )
+            
+            try await self.render(path, context: context)
           }
         }
-        
-        return try await group.reduce(into: [(AbsolutePath, RenderResult)]()) { partialResult, result in
-          partialResult.append(result)
-        }
 
-      }
-      
-      if let outputDirectory {
-        
-        let outputDirectoryAbsolute = AbsolutePath(outputDirectory, relativeTo: localFileSystem.currentWorkingDirectory!)
-        
-        for result in results {
-          
-          let path = result.0
-          let r = result.1
-          let c = r.header()
-                    
-          let fileName = [path.basenameWithoutExt, c.outputConfiguration.fileExtension].compactMap { $0 }.joined(separator: ".")
-          
-          let writePath = outputDirectoryAbsolute.appending(component: fileName)
-          
-          try r.outputData.write(to: URL.init(fileURLWithPath: writePath.pathString), options: [.atomic])
-          
-          Log.info("✅ \(writePath.pathString)")
-                             
-        }
-        
-      } else {
-        for result in results {
-          print(result.1.outputString())
-        }
-      }
-
+      }      
     }
 
-    private func render(_ targetFilePath: AbsolutePath) async throws -> RenderResult {
+    private func render(_ targetFilePath: AbsolutePath, context: GrainDescriptor.Context) async throws {
 
       guard localFileSystem.exists(targetFilePath) else {
         throw CLIError.fileNotFound
@@ -197,7 +157,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
       ]
       cmd += ["-swift-version", "5"]
 
-      return try await withTemporaryDirectory { workingPath -> RenderResult in
+      return try await withTemporaryDirectory { workingPath in
 
         let compiledFile = workingPath.appending(component: "compiled")
         
@@ -226,26 +186,10 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         
         // make an output
         do {
-          
-          let outputFile = workingPath.appending(component: "output")
-          let outputHeaderFile = workingPath.appending(component: "output_header")
-
-          guard let outputFileDesc = fopen(outputFile.pathString, "w") else {
-            throw DomainError.couldNotCreateOutputFile
-          }
-          
-          guard let outputHeaderFileDesc = fopen(outputHeaderFile.pathString, "w") else {
-            throw DomainError.couldNotCreateOutputFile
-          }
-
+                
           var cmd: [String] = []
           
           cmd += [compiledFile.pathString]
-
-          cmd += ["-fileno-output", "\(fileno(outputFileDesc))"]
-          cmd += ["-fileno-header", "\(fileno(outputHeaderFileDesc))"]
-          
-          let context = GrainDescriptor.Context(filePath: targetFilePath.pathString)
           
           cmd += ["-context", context.json()]
 
@@ -255,9 +199,6 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
             loggingHandler: { log in }
           )
 
-          fclose(outputFileDesc)
-          fclose(outputHeaderFileDesc)
-
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
             
@@ -266,12 +207,9 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
             
             throw DomainError.failureInMakingOutput
           }
-
-          let output: Data = try localFileSystem.readFileContents(outputFile)
-          let outputHeader: Data = try localFileSystem.readFileContents(outputHeaderFile)
-
-          return .init(outputData: output, headerData: outputHeader)
-
+          
+          Log.info(try result.utf8Output())
+   
         }
         
       }
