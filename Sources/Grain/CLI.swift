@@ -15,7 +15,7 @@ struct CLIError: Swift.Error, LocalizedError, Equatable {
 }
 
 struct CLI: AsyncParsableCommand {
-  
+
   static var configuration: CommandConfiguration {
     .init(
       commandName: "Grain",
@@ -30,27 +30,57 @@ struct CLI: AsyncParsableCommand {
   }
 
   struct Render: AsyncParsableCommand {
-    
+
     struct DomainError: Swift.Error, LocalizedError, Equatable {
-      
+
       var errorDescription: String?
-      
+
       static var failedToCompile: Self = .init(errorDescription: "Failed to compile")
-      static var couldNotCreateOutputFile: Self = .init(errorDescription: "Could not create output file")
+      static var couldNotCreateOutputFile: Self = .init(
+        errorDescription: "Could not create output file"
+      )
       static var failureInMakingOutput: Self = .init(errorDescription: "Failure in makiing output")
-      
+
     }
 
-    @Argument var targetFilePath: String
+    @Argument var targetFilePaths: [String]
+    @Option(name: .customLong("output")) var outputDirectory: String?
     @Flag var verbose = false
 
-    mutating func run() async throws {
+    func run() async throws {
 
-      let filePath = localFileSystem.currentWorkingDirectory!.appending(
-        RelativePath(targetFilePath)
-      )
+      let validatedPaths = targetFilePaths.map {
+        localFileSystem.currentWorkingDirectory!.appending(RelativePath($0))
+      }
+      
+      let results = try await withThrowingTaskGroup(of: (AbsolutePath, Data).self) { group in
+        
+        for path in validatedPaths {
+          group.addTask {
+            let data = try await self.render(path)
+            return (path, data)
+          }
+        }
+        
+        return try await group.reduce(into: [(AbsolutePath, Data)]()) { partialResult, result in
+          partialResult.append(result)
+        }
 
-      guard localFileSystem.exists(filePath) else {
+      }
+      
+      if let outputDirectory {
+        // FIXME:
+      } else {
+        for result in results {
+          print(String(data: result.1, encoding: .utf8)!)
+        }
+      }
+
+    }
+
+    private func render(_ targetFilePath: AbsolutePath) async throws -> Data {
+
+      guard localFileSystem.exists(targetFilePath) else {
         throw CLIError.fileNotFound
       }
 
@@ -62,26 +92,28 @@ struct CLI: AsyncParsableCommand {
         )
         .spm_chomp()
       )
-            
+
       let triple = Triple.getHostTriple(usingSwiftCompiler: swiftCompilerPath)
-      
+
       /// a directory path of this process binary
       let applicationDirPath = try Utils.hostBinDir(fileSystem: localFileSystem)
 
       var runtimeFrameworksPath: AbsolutePath {
-                
-        if localFileSystem.exists(applicationDirPath.appending(component: "lib\(RUNTIME_NAME).dylib")) {
+
+        if localFileSystem.exists(
+          applicationDirPath.appending(component: "lib\(RUNTIME_NAME).dylib")
+        ) {
           // a case of releasing
           return applicationDirPath
         }
-        
-        // in development 
+
+        // in development
         return applicationDirPath.appending(
           components: "PackageFrameworks",
           "\(RUNTIME_NAME).framework"
         )
       }
-      
+
       var libraryPath: AbsolutePath {
         if runtimeFrameworksPath.extension == "framework" {
           return runtimeFrameworksPath.appending(component: RUNTIME_NAME)
@@ -90,11 +122,13 @@ struct CLI: AsyncParsableCommand {
           return runtimeFrameworksPath.appending(component: "lib\(RUNTIME_NAME).dylib")
         }
       }
-      
-      Log.debug("""
-applicationPath: \(applicationDirPath)
-runtimeFrameworksPath: \(runtimeFrameworksPath)
-""")
+
+      Log.debug(
+        """
+        applicationPath: \(applicationDirPath)
+        runtimeFrameworksPath: \(runtimeFrameworksPath)
+        """
+      )
 
       guard localFileSystem.exists(libraryPath) else {
         throw CLIError.runtimeNotFound
@@ -108,7 +142,7 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
 
       var cmd: [String] = []
       cmd += [swiftCompilerPath.pathString]
-      
+
       if runtimeFrameworksPath.extension == "framework" {
         cmd += [
           "-F", runtimeFrameworksPath.parentDirectory.pathString,
@@ -119,84 +153,90 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         cmd += [
           "-L", runtimeFrameworksPath.pathString,
           "-l\(RUNTIME_NAME)",
-          "-Xlinker", "-rpath", "-Xlinker", runtimeFrameworksPath.pathString
+          "-Xlinker", "-rpath", "-Xlinker", runtimeFrameworksPath.pathString,
         ]
       }
-      
+
       cmd += ["-target", triple.tripleString(forPlatformVersion: target!.versionString)]
 
       cmd += ["-sdk", sdkPath.pathString]
       cmd += Utils.flags()
 
-      cmd += [filePath.pathString]
+      // target swift file
+      cmd += [targetFilePath.pathString]
+
       cmd += [
-//        "-Xfrontend", "-disable-implicit-concurrency-module-import",
+        //        "-Xfrontend", "-disable-implicit-concurrency-module-import",
         "-Xfrontend", "-disable-implicit-string-processing-module-import",
         "-I", applicationDirPath.pathString,
       ]
       cmd += ["-swift-version", "5"]
 
-      try await withTemporaryDirectory { workingPath in
-        
+      return try await withTemporaryDirectory { workingPath -> Data in
+
         let compiledFile = workingPath.appending(component: "compiled")
-        
+
         // make a binary
         do {
-          
+
           cmd += ["-o", compiledFile.pathString]
-          
+
           Log.debug("Make executable binary\n\(cmd.joined(separator: "\\\n"))")
-          
+
           // compile
           let result = try await TSCBasic.Process.popen(
             arguments: cmd,
             environment: ProcessInfo.processInfo.environment,
             loggingHandler: { log in }
           )
-          
+
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
             let output = try result.utf8stderrOutput()
             Log.error("\(output)\n\(cmd.joined(separator: " "))")
             throw DomainError.failedToCompile
           }
-          
+
         }
-        
+
         // make an output
         do {
-          
+
           let outputFile = workingPath.appending(component: "output")
-          
+
           guard let outputFileDesc = fopen(outputFile.pathString, "w") else {
             throw DomainError.couldNotCreateOutputFile
           }
-          
+
           var cmd: [String] = []
-          
+
           cmd += [compiledFile.pathString]
-          
+
           cmd += ["-fileno", "\(fileno(outputFileDesc))"]
-          
-          let result = try await TSCBasic.Process.popen(arguments: cmd, environment: ProcessInfo.processInfo.environment, loggingHandler: { log in })
-                    
+
+          let result = try await TSCBasic.Process.popen(
+            arguments: cmd,
+            environment: ProcessInfo.processInfo.environment,
+            loggingHandler: { log in }
+          )
+
           fclose(outputFileDesc)
-          
+
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
-            
+
             let output = try result.utf8stderrOutput()
             Log.error("\(output)\n\(cmd.joined(separator: " "))")
-            
+
             throw DomainError.failureInMakingOutput
           }
-          
-          let output: String = try localFileSystem.readFileContents(outputFile)
-          
-          print(output)
-          
+
+          let output: Data = try localFileSystem.readFileContents(outputFile)
+
+          return output
+
         }
-        
+
       }
     }
 
@@ -204,17 +244,18 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
 
 }
 
-func withTemporaryDirectory(_ work: @escaping (AbsolutePath) async throws -> Void) async throws {
-  
-  try await withCheckedThrowingContinuation { continuation in
-    
+func withTemporaryDirectory<R>(_ work: @escaping (AbsolutePath) async throws -> R) async throws -> R
+{
+
+  return try await withCheckedThrowingContinuation { continuation in
+
     do {
       try withTemporaryDirectory { path, completion -> Void in
         Task {
           do {
-            try await work(path)
+            let result = try await work(path)
             completion(path)
-            continuation.resume()
+            continuation.resume(returning: result)
           } catch {
             print(error)
             // handle error
@@ -227,7 +268,7 @@ func withTemporaryDirectory(_ work: @escaping (AbsolutePath) async throws -> Voi
       continuation.resume(throwing: error)
     }
   }
-  
+
 }
 
 extension TSCBasic.Process {
@@ -340,8 +381,10 @@ enum Utils {
   static func hostBinDir(
     fileSystem: FileSystem
   ) throws -> AbsolutePath {
-                 
-    return try AbsolutePath(validating: (Bundle.main.executablePath! as NSString).resolvingSymlinksInPath).parentDirectory
+
+    return try AbsolutePath(
+      validating: (Bundle.main.executablePath! as NSString).resolvingSymlinksInPath
+    ).parentDirectory
   }
 }
 

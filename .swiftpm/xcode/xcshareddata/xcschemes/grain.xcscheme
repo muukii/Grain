@@ -78,8 +78,12 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "./Sources/Fixture.swift --verbose"
+            argument = "./Sources/Fixture.swift ./fixtures/openapi.swift --verbose"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "render --help"
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
