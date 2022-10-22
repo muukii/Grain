@@ -1,7 +1,7 @@
-@_exported import Alamofire
+import Alamofire
 @_implementationOnly import Darwin.C
-@_exported import Foundation
-@_exported import TSCBasic
+import Foundation
+import TSCBasic
 
 public struct Serialization {
 

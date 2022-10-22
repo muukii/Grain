@@ -416,6 +416,14 @@ public struct GrainArray: GrainView {
 
 }
 
+public struct GrainObjectSpread: GrainView {
+  
+  public typealias Body = Never
+  
+  public var members: [GrainMember]
+    
+}
+
 public struct GrainObject: GrainView {
   
   public typealias Body = Never
@@ -424,6 +432,10 @@ public struct GrainObject: GrainView {
   
   public init(@MemberBuilder _ members: () -> [GrainMember]) {
     self.members = members()
+  }
+  
+  public var spread: GrainObjectSpread {
+    .init(members: members)
   }
   
   public func encode(to encoder: Encoder) throws {
@@ -467,6 +479,10 @@ public struct GrainObject: GrainView {
     
     public static func buildExpression(_ element: Element) -> [Element] {
       return [element]
+    }
+    
+    public static func buildExpression(_ element: GrainObjectSpread) -> [Element] {
+      element.members
     }
     
     public static func buildExpression<C: Sequence>(_ elements: C) -> [C.Element] where C.Element == Element {
