@@ -57,9 +57,11 @@ struct CLI: AsyncParsableCommand {
       let foundPath = try TSCBasic.Process.checkNonZeroExit(arguments: [
         "/usr/bin/xcrun", "--find", "swiftc",
       ]).spm_chomp()
-
+      
       let swiftc = try AbsolutePath(validating: foundPath)
-
+      
+      let triple = Triple.getHostTriple(usingSwiftCompiler: swiftc)
+      
       let applicationPath = try Utils.hostBinDir(fileSystem: localFileSystem)
 
       var runtimeFrameworksPath: AbsolutePath {
@@ -114,7 +116,8 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
           "-Xlinker", "-rpath", "-Xlinker", runtimeFrameworksPath.pathString
         ]
       }
-      cmd += ["-target", "arm64-apple-macosx\(target!.versionString)"]
+      
+      cmd += ["-target", triple.tripleString(forPlatformVersion: target!.versionString)]
 
       cmd += ["-sdk", sdkPath.pathString]
       cmd += Utils.flags()
