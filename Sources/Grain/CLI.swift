@@ -2,6 +2,7 @@ import ArgumentParser
 import Foundation
 import TSCBasic
 import TSCUtility
+import GrainDescriptor
 
 let RUNTIME_NAME = "GrainDescriptor"
 
@@ -31,6 +32,23 @@ struct CLI: AsyncParsableCommand {
 
   struct Render: AsyncParsableCommand {
     
+<<<<<<< Updated upstream
+=======
+    struct RenderResult {
+      let outputData: Data
+      let headerData: Data
+      
+      func header() -> GrainDescriptor.Header {
+        .decode(headerData)
+      }
+      
+      func outputString() -> String {
+        String(data: outputData, encoding: .utf8)!
+      }
+      
+    }
+
+>>>>>>> Stashed changes
     struct DomainError: Swift.Error, LocalizedError, Equatable {
       
       var errorDescription: String?
@@ -46,11 +64,64 @@ struct CLI: AsyncParsableCommand {
 
     mutating func run() async throws {
 
+<<<<<<< Updated upstream
       let filePath = localFileSystem.currentWorkingDirectory!.appending(
         RelativePath(targetFilePath)
       )
 
       guard localFileSystem.exists(filePath) else {
+=======
+      let validatedPaths = targetFilePaths.map {
+        AbsolutePath($0, relativeTo: localFileSystem.currentWorkingDirectory!)
+      }
+            
+      let results = try await withThrowingTaskGroup(of: (AbsolutePath, RenderResult).self) { group in
+        
+        for path in validatedPaths {
+          group.addTask {
+            let result = try await self.render(path)
+            return (path, result)
+          }
+        }
+        
+        return try await group.reduce(into: [(AbsolutePath, RenderResult)]()) { partialResult, result in
+          partialResult.append(result)
+        }
+
+      }
+      
+      if let outputDirectory {
+        
+        let outputDirectoryAbsolute = AbsolutePath(outputDirectory, relativeTo: localFileSystem.currentWorkingDirectory!)
+        
+        for result in results {
+          
+          let path = result.0
+          let r = result.1
+          let c = r.header()
+                    
+          let fileName = [path.basenameWithoutExt, c.outputConfiguration.fileExtension].compactMap { $0 }.joined(separator: ".")
+          
+          let writePath = outputDirectoryAbsolute.appending(component: fileName)
+          
+          try r.outputData.write(to: URL.init(fileURLWithPath: writePath.pathString), options: [.atomic])
+          
+          Log.info("✅ \(writePath.pathString)")
+                             
+        }
+        
+      } else {
+        for result in results {
+          print(result.1.outputString())
+        }
+      }
+
+    }
+
+    private func render(_ targetFilePath: AbsolutePath) async throws -> RenderResult {
+
+      guard localFileSystem.exists(targetFilePath) else {
+>>>>>>> Stashed changes
         throw CLIError.fileNotFound
       }
 
@@ -136,8 +207,13 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
       ]
       cmd += ["-swift-version", "5"]
 
+<<<<<<< Updated upstream
       try await withTemporaryDirectory { workingPath in
         
+=======
+      return try await withTemporaryDirectory { workingPath -> RenderResult in
+
+>>>>>>> Stashed changes
         let compiledFile = workingPath.appending(component: "compiled")
         
         // make a binary
@@ -167,14 +243,27 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
         do {
           
           let outputFile = workingPath.appending(component: "output")
+<<<<<<< Updated upstream
           
+=======
+          let outputHeaderFile = workingPath.appending(component: "output_header")
+
+>>>>>>> Stashed changes
           guard let outputFileDesc = fopen(outputFile.pathString, "w") else {
             throw DomainError.couldNotCreateOutputFile
           }
           
+<<<<<<< Updated upstream
+=======
+          guard let outputHeaderFileDesc = fopen(outputHeaderFile.pathString, "w") else {
+            throw DomainError.couldNotCreateOutputFile
+          }
+
+>>>>>>> Stashed changes
           var cmd: [String] = []
           
           cmd += [compiledFile.pathString]
+<<<<<<< Updated upstream
           
           cmd += ["-fileno", "\(fileno(outputFileDesc))"]
           
@@ -182,6 +271,21 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
                     
           fclose(outputFileDesc)
           
+=======
+
+          cmd += ["-fileno-output", "\(fileno(outputFileDesc))"]
+          cmd += ["-fileno-header", "\(fileno(outputHeaderFileDesc))"]
+
+          let result = try await TSCBasic.Process.popen(
+            arguments: cmd,
+            environment: ProcessInfo.processInfo.environment,
+            loggingHandler: { log in }
+          )
+
+          fclose(outputFileDesc)
+          fclose(outputHeaderFileDesc)
+
+>>>>>>> Stashed changes
           // Return now if there was an error.
           if result.exitStatus != .terminated(code: 0) {
             
@@ -190,11 +294,20 @@ runtimeFrameworksPath: \(runtimeFrameworksPath)
             
             throw DomainError.failureInMakingOutput
           }
+<<<<<<< Updated upstream
           
           let output: String = try localFileSystem.readFileContents(outputFile)
           
           print(output)
           
+=======
+
+          let output: Data = try localFileSystem.readFileContents(outputFile)
+          let outputHeader: Data = try localFileSystem.readFileContents(outputHeaderFile)
+
+          return .init(outputData: output, headerData: outputHeader)
+
+>>>>>>> Stashed changes
         }
         
       }

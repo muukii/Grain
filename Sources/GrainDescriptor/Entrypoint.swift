@@ -45,8 +45,35 @@ public struct Serialization {
     
 }
 
+public struct Header: Codable {
+  public let outputConfiguration: OutputConfiguration
+  
+  public func json() -> String {
+    let e = JSONEncoder()
+    let d = try! e.encode(self)
+    return String(data: d, encoding: .utf8)!
+  }
+  
+  public static func decode(_ data: Data) -> Self {
+    let d = JSONDecoder()
+    let r = try! d.decode(Self.self, from: data)
+    return r
+  }
+}
+
+public struct OutputConfiguration: Codable {
+
+  public var fileExtension: String?
+    
+  public init(fileExtension: String? = nil) {
+    self.fileExtension = fileExtension
+  }
+    
+}
+
 public func serialize(
   serialization: Serialization = .json,
+  outputConfiguration: OutputConfiguration = .init(fileExtension: "json"),
   @GrainBuilder _ thunk: () throws -> some GrainView
 ) {
   
@@ -56,16 +83,33 @@ public func serialize(
     let data = try serialization.encode(value)
     let text = String(data: data, encoding: .utf8)!
     
-    if let optIdx = CommandLine.arguments.firstIndex(of: "-fileno") {
-      if let outputFileDesc = Int32(CommandLine.arguments[optIdx + 1]) {
-        guard let fd = fdopen(outputFileDesc, "w") else {
-          return
+    // write output
+    do {
+      if let optIdx = CommandLine.arguments.firstIndex(of: "-fileno-output") {
+        if let outputFileDesc = Int32(CommandLine.arguments[optIdx + 1]) {
+          guard let fd = fdopen(outputFileDesc, "w") else {
+            return
+          }
+          fputs(text, fd)
+          fclose(fd)
         }
-        fputs(text, fd)
-        fclose(fd)
+      } else {
+        print(text)
       }
-    } else {
-      print(text)
+    }
+    
+    // write header
+    do {
+      if let optIdx = CommandLine.arguments.firstIndex(of: "-fileno-header") {
+        if let outputFileDesc = Int32(CommandLine.arguments[optIdx + 1]) {
+          guard let fd = fdopen(outputFileDesc, "w") else {
+            return
+          }
+          fputs(Header.init(outputConfiguration: outputConfiguration).json(), fd)
+          fclose(fd)
+        }
+      } else {
+      }
     }
   } catch {
     print("❌ Serialization failed:", error)

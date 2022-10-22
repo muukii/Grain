@@ -13,6 +13,14 @@ enum Log {
     }
   }
   
+  static func info(
+    file: StaticString = #file,
+    line: UInt = #line,
+    _ object: @autoclosure () -> Any
+  ) {    
+    print(object())
+  }
+  
   static func error(
     file: StaticString = #file,
     line: UInt = #line,
