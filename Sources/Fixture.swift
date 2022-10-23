@@ -2,9 +2,9 @@ import GrainDescriptor
 import Foundation
 import Alamofire
 
-let response = try await AF.request("https://httpbin.org/get").serializingString().value
+//let response = try await AF.request("https://httpbin.org/get").serializingString().value
 
-serialize {
+serialize(.yaml) {
   
   GrainObject {
     GrainMember("data") {
@@ -13,9 +13,9 @@ serialize {
         .init(name: "B", age: 2),
       ])
     }
-    GrainMember("result") {
-      response
-    }
+//    GrainMember("result") {
+//      response
+//    }
     GrainMember("context") {
       context.filePath.pathString
     }

@@ -42,8 +42,9 @@ struct CLI: AsyncParsableCommand {
       
     }
 
-    @Argument var targetFilePaths: [String]
+    @Argument(completion: .directory) var targetFilePaths: [String]
     @Option(name: .customLong("output")) var outputDirectory: String?
+    @Option(help: "a parameter to inject json as Context") var userInfo: String?
     @Flag var verbose = false
 
     func run() async throws {
@@ -59,7 +60,8 @@ struct CLI: AsyncParsableCommand {
                         
             let context = GrainDescriptor.Context(
               filePath: path,
-              outputDir: outputDirectory.map { AbsolutePath($0, relativeTo: localFileSystem.currentWorkingDirectory!) }
+              outputDir: outputDirectory.map { AbsolutePath($0, relativeTo: localFileSystem.currentWorkingDirectory!) },
+              userInfoString: userInfo
             )
             
             try await self.render(path, context: context)
