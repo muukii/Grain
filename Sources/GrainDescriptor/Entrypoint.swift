@@ -2,7 +2,11 @@ import Alamofire
 @_implementationOnly import Darwin.C
 import Foundation
 import TSCBasic
+import Yams
 
+/**
+ The strategy to use serialization as `Data`
+ */
 public struct Serialization {
 
   private let _encode: (any GrainView) throws -> Data
@@ -43,6 +47,45 @@ public struct Serialization {
     )
 
   }
+  
+  public static var plist: Self {
+    plist(outputFormat: .xml)
+  }
+  
+  public static func plist(
+    outputFormat: PropertyListSerialization.PropertyListFormat
+  ) -> Self {
+    
+    let encoder = PropertyListEncoder()
+    
+    return .init(
+      fileExtension: "plist",
+      encode: {
+        try encoder.encode($0)
+      }
+    )
+    
+  }
+  
+  public static var yaml: Self {
+    yaml(options: .init())
+  }
+  
+  public static func yaml(options: YAMLEncoder.Options) -> Self {
+    
+    let encoder = YAMLEncoder()
+    
+    encoder.options = options
+    
+    return .init(
+      fileExtension: "yml",
+      encode: {
+        let string = try encoder.encode($0)
+        return string.data(using: .utf8)!
+      }
+    )
+    
+  }
 
   public func encode(_ view: some GrainView) throws -> Data {
     return try _encode(view)
@@ -51,16 +94,23 @@ public struct Serialization {
 }
 
 public struct Context: Codable {
+  
+  public enum DomainError: Int, Error {
+    case contextNotProvided
+  }
 
   public let filePath: AbsolutePath
   public let outputDir: AbsolutePath?
+  public let userInfoString: String?
 
   public init(
     filePath: AbsolutePath,
-    outputDir: AbsolutePath?
+    outputDir: AbsolutePath?,
+    userInfoString: String?
   ) {
     self.filePath = filePath
     self.outputDir = outputDir
+    self.userInfoString = userInfoString
   }
 
   public func json() -> String {
@@ -78,6 +128,15 @@ public struct Context: Codable {
   public func write(data: Data, into path: AbsolutePath) throws {
     let url = URL(fileURLWithPath: path.pathString)
     try data.write(to: url, options: [.atomic])
+  }
+  
+  public func userInfo<T: Decodable>(_ decodableType: T.Type) throws -> T {
+    guard let userInfoString else {
+      throw DomainError.contextNotProvided
+    }
+    let decoder = JSONDecoder()
+    let decoded = try decoder.decode(decodableType.self, from: userInfoString.data(using: .utf8)!)
+    return decoded
   }
 
 }
@@ -142,6 +201,14 @@ public struct Output {
     }
   }
 
+}
+
+public func serialize(
+  _ serialization: Serialization = .json,
+  output: Output = .stdout,
+  @GrainBuilder _ thunk: () throws -> some GrainView
+) {
+  serialize(serialization: serialization, output: output, thunk)
 }
 
 public func serialize(

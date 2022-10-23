@@ -93,6 +93,10 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "./Sources/Fixture.swift ./fixtures/openapi.swift --output /Users/muukii/Desktop"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "./fixtures/context.swift --user-info &apos;{&quot;name&quot; : &quot;muukii&quot;}&apos;"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
