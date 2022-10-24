@@ -211,6 +211,7 @@ public func serialize(
   serialize(serialization: serialization, output: output, thunk)
 }
 
+@_disfavoredOverload
 public func serialize(
   serialization: Serialization = .json,
   output: Output = .stdout,
