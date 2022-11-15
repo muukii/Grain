@@ -27,7 +27,6 @@ extension GrainView {
 
 extension GrainView where Body == Never {
   
-  @_spi(JSONNever)
   public var body: Body {
     fatalError()
   }
@@ -36,7 +35,6 @@ extension GrainView where Body == Never {
 
 extension Never: GrainView {
   
-  @_spi(JSONNever)
   public var body: GrainEmpty {
     return GrainEmpty()
   }
@@ -420,7 +418,7 @@ public struct GrainObjectSpread: GrainView {
   
   public typealias Body = Never
   
-  public var members: [GrainMember]
+  public var members: [any GrainView]
     
 }
 
@@ -428,9 +426,9 @@ public struct GrainObject: GrainView {
   
   public typealias Body = Never
   
-  public var members: [GrainMember]
+  public var members: [any GrainView]
   
-  public init(@MemberBuilder _ members: () -> [GrainMember]) {
+  public init(@MemberBuilder _ members: () -> [any GrainView]) {
     self.members = members()
   }
   
@@ -447,7 +445,7 @@ public struct GrainObject: GrainView {
   @resultBuilder
   public enum MemberBuilder {
     
-    public typealias Element = GrainMember
+    public typealias Element = any GrainView
  
     public static func buildBlock() -> [Element] {
       []
