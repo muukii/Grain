@@ -27,7 +27,6 @@ extension GrainView {
 
 extension GrainView where Body == Never {
   
-  @_spi(JSONNever)
   public var body: Body {
     fatalError()
   }
@@ -36,7 +35,6 @@ extension GrainView where Body == Never {
 
 extension Never: GrainView {
   
-  @_spi(JSONNever)
   public var body: GrainEmpty {
     return GrainEmpty()
   }
